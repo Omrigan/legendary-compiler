@@ -3,28 +3,34 @@
 
 using namespace std;
 enum types {
-    KEYWORD,
-    INT_LITERAL, FLOAT_LITERAL, STRING_LITERAL,
-    OPERATOR, ID, SIGN,
-    OTHER
+    KEYWORD, //0
+    INT_LITERAL, FLOAT_LITERAL, STRING_LITERAL, // 1 2 3
+    OPERATOR, ID, SIGN, // 4 5 6
+    OTHER // 7
 
 
 };
-unordered_set<string> keywords = {
+set<string> keywords = {
         "while",
         "if"
 };
 
-unordered_set<string> signs = {
+set<string> signs = {
         "{",
         "}",
         "."
 };
+vector<string> operators_prior = {
+        "++",
+        "==",
+};
 
-unordered_set<string> operators = {
+set<string> operators = {
+        "++",
+        "==",
         "+",
         "=",
-        "=="
+
 };
 
 struct lexem {
@@ -68,8 +74,9 @@ bool isLongCommentEnding(string s) {
     regex re(".*\\*/");
     return regex_match(s.c_str(), re);
 }
-bool isLineEnding(string s){
-    return s=="\n";
+
+bool isLineEnding(string s) {
+    return s == "\n";
 }
 
 vector<lexem> analysis(vector<string> strings) {
@@ -81,10 +88,10 @@ vector<lexem> analysis(vector<string> strings) {
         l.s = s;
         if (isShortComment(s))
             short_comment = true;
-        if(isLongCommentBegiging(s))
+        if (isLongCommentBegiging(s))
             long_comment = true;
 
-        if(isLineEnding(s))
+        if (isLineEnding(s))
             short_comment = false;
         else if (!long_comment && !short_comment) {
             if (operators.count(s) > 0) l.t = types::OPERATOR;
@@ -97,7 +104,7 @@ vector<lexem> analysis(vector<string> strings) {
             else l.t = types::OTHER;
             out.push_back(l);
         }
-        if(isLongCommentEnding(s))
+        if (isLongCommentEnding(s))
             long_comment = false;
 
 
@@ -112,11 +119,26 @@ vector<string> spilt(string s) {
 
     regex delim("\\s+");
     sregex_token_iterator iter(s.begin(), s.end(), delim, -1);
-    std::sregex_token_iterator end;
+    sregex_token_iterator end;
     vector<string> out;
     for (; iter != end; ++iter) {
         out.push_back((*iter));
+    }
+    for (string op : operators_prior) {
+        vector<string> out2;
+        for (string s : out) {
+            string delim(op);
+            size_t pos = 0;
+            std::string token;
+            while ((pos = s.find(delim)) != std::string::npos) {
+                s.erase(0, pos + delim.length());
+                out2.push_back(delim);
+            }
+            if (s.size() > 0)
+                out2.push_back(s);
 
+        }
+        out = out2;
     }
     return out;
 
