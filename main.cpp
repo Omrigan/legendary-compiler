@@ -6,107 +6,186 @@ enum types {
     KEYWORD, //0
     INT_LITERAL, FLOAT_LITERAL, STRING_LITERAL, // 1 2 3
     OPERATOR, ID, SIGN, // 4 5 6
-    OTHER // 7
-
+    OTHER, // 7
+    SPAM
+};
+enum vertex {
+    ZERO,
+    COMMENT_SHORT, COMMENT_LONG, COMMENT_END_STAR, COMMENT_END_SLASH,
+    STRING, END_STRING,
+    INT, FLOAT, FLOAT_END,
+    ID_END,
+    PLUSMINUS,
+    SIGN_END,
+    DOT, SLASH,
+    OPERATOR_END,
+    _ERROR
 
 };
-set<string> keywords = {
-        "while",
-        "if"
-};
-
-set<string> signs = {
-        "{",
-        "}",
-        "."
-};
-
 struct lexem {
     string s;
     types t;
 
 
 };
+map<vertex, map<char, vertex>> edges;
+map<vertex, types> terminals;
 
 
-
-vector<lexem> analysis(vector<string> strings) {
-    bool short_comment = false;
-    vector<lexem> out;
-    bool long_comment = false;
-    for (string s : strings) {
-        lexem l;
-        l.s = s;
-        if (isShortComment(s))
-            short_comment = true;
-        if (isLongCommentBegiging(s))
-            long_comment = true;
-
-        if (isLineEnding(s))
-            short_comment = false;
-        else if (!long_comment && !short_comment) {
-            if (operators.count(s) > 0) l.t = types::OPERATOR;
-            else if (signs.count(s) > 0) l.t = types::SIGN;
-            else if (keywords.count(s) > 0) l.t = types::KEYWORD;
-            else if (isFloatLiteral(s)) l.t = types::FLOAT_LITERAL;
-            else if (isStringLiteral(s)) l.t = types::STRING_LITERAL;
-            else if (isIntLiteral(s)) l.t = types::INT_LITERAL;
-            else if (isId(s)) l.t = types::ID;
-            else l.t = types::OTHER;
-            out.push_back(l);
-        }
-        if (isLongCommentEnding(s))
-            long_comment = false;
-
-
+void build() {
+    edges[vertex::ZERO] = {
+            {'\"', vertex::STRING},
+            {'-',  vertex::PLUSMINUS},
+            {'+',  vertex::PLUSMINUS},
+            {'=',  vertex::PLUSMINUS},
+            {'*',  vertex::PLUSMINUS},
+            {'{',  vertex::SIGN_END},
+            {'}',  vertex::SIGN_END},
+            {'.',  vertex::DOT},
+            {',',  vertex::SIGN_END},
+            {'[',  vertex::SIGN_END},
+            {']',  vertex::SIGN_END},
+            {'*',  vertex::OPERATOR_END},
+            {'/',  vertex::SLASH},
+            {'^',  vertex::OPERATOR_END},
+            {' ',  vertex::ZERO},
+            {'\n', vertex::ZERO},
+    };
+    edges[vertex::STRING] = {
+            {'"', vertex::END_STRING}
+    };
+    edges[vertex::INT] = {
+            {'.', vertex::FLOAT},
+            {'f', vertex::FLOAT_END}
+    };
+    edges[vertex::PLUSMINUS] = {
+            {'-', vertex::OPERATOR_END},
+            {'+', vertex::OPERATOR_END},
+            {'=', vertex::OPERATOR_END},
+            {'*', vertex::OPERATOR_END},
+    };
+    edges[vertex::FLOAT] = {
+            {'f', vertex::FLOAT_END}
+    };
+    edges[vertex::SLASH] = {
+            {'/', vertex::COMMENT_SHORT },
+            {'*', vertex::COMMENT_LONG }
+    };
+    for (char i = '0'; i <= '9'; ++i) {
+        edges[vertex::ZERO][i] = vertex::INT;
+        edges[vertex::DOT][i] = vertex::FLOAT;
+        edges[vertex::INT][i] = vertex::INT;
+        edges[vertex::FLOAT][i] = vertex::FLOAT;
+        edges[vertex::ID_END][i] = vertex::ID_END;
     }
-    return out;
+    set<char> names = {'_', '$'};
 
+    for (char i = 'a'; i <= 'z'; ++i) {
+        names.insert(i);
+    }
+    for (char i = 'A'; i <= 'Z'; ++i) {
+        names.insert(i);
+    }
+    for(char c : names) {
+        edges[vertex::ZERO][c] = vertex::ID_END;
+        edges[vertex::ID_END][c] = vertex::ID_END;
+    }
+    terminals[vertex::END_STRING] = types::STRING_LITERAL;
+    terminals[vertex::INT] = types::INT_LITERAL;
+    terminals[vertex::FLOAT] = types::FLOAT_LITERAL;
+    terminals[vertex::FLOAT_END] = types::FLOAT_LITERAL;
+    terminals[vertex::SIGN_END] = types::SIGN;
+    terminals[vertex::PLUSMINUS] = types::OPERATOR;
+    terminals[vertex::OPERATOR_END] = types::OPERATOR;
+    terminals[vertex::SLASH] = types::OPERATOR;
+    terminals[vertex::DOT] = types::SIGN;
+    terminals[vertex::ID_END] = types::ID;
+    terminals[vertex::COMMENT_SHORT] = types::SPAM;
+    terminals[vertex::COMMENT_END_SLASH] = types::SPAM;
 
+}
+bool possible(vertex cur, char c){
+    if(cur==vertex::COMMENT_SHORT)
+        return c!='\n';
+    if(cur==vertex::COMMENT_LONG or cur==vertex::STRING
+       or cur==vertex::COMMENT_END_STAR ){
+        return true;
+    }
+    return edges[cur].find(c) != edges[cur].end();
 }
 
 
-vector<string> spilt(string s) {
-
-    regex delim("\\s+");
-    sregex_token_iterator iter(s.begin(), s.end(), delim, -1);
-    sregex_token_iterator end;
-    vector<string> out;
-    for (; iter != end; ++iter) {
-        out.push_back((*iter));
+vertex go_ahead(vertex cur, char c){
+    if(cur==vertex::COMMENT_SHORT){
+        return vertex::COMMENT_SHORT;
     }
-    for (string op : operators_prior) {
-        vector<string> out2;
-        for (string s : out) {
-            string delim(op);
-            size_t pos = 0;
-            std::string token;
-            while ((pos = s.find(delim)) != std::string::npos) {
-                s.erase(0, pos + delim.length());
-                out2.push_back(delim);
+    if(cur==vertex::COMMENT_LONG)
+    {
+        if(c=='*')
+            return vertex::COMMENT_END_STAR;
+        return vertex::COMMENT_LONG;
+    }
+    if(cur==vertex::COMMENT_END_STAR)
+    {
+        if(c=='/')
+            return vertex::COMMENT_END_SLASH;
+        return vertex::COMMENT_LONG;
+    }
+    if(cur==vertex::STRING){
+        if(c=='"')
+            return vertex::END_STRING;
+        return vertex::STRING;
+    }
+    return edges[cur][c];
+}
+
+
+
+vector<lexem> analysis(string s) {
+    vector<lexem> ans;
+    vertex curv = vertex::ZERO;
+    string s2 = "";
+    for (auto c : s) {
+        if ( !possible(curv, c)
+            and curv!=vertex::ZERO) {
+            if(terminals[curv]!=types::SPAM) {
+                lexem l;
+                l.s = s2;
+                l.t = terminals[curv];
+                ans.push_back(l);
             }
-            if (s.size() > 0)
-                out2.push_back(s);
+            curv = vertex::ZERO;
+            s2="";
+        }
+        if (!possible(curv, c)){
+            assert(curv==vertex::ZERO);
+            lexem l;
+            l.s = c;
+            l.t = types::OTHER;
+            ans.push_back(l);
+            s2="";
+        }else {
+            curv = go_ahead(curv, c);
+            if(curv!=vertex::ZERO)
+                s2 += c;
 
         }
-        out = out2;
+
     }
-    return out;
+    return ans;
+
 
 }
+
 
 void run() {
-    vector<string> strings;
+    string strings = "";
     while (!cin.eof()) {
         string s;
         getline(cin, s);
-        vector<string> tmp = spilt(s);
-        for (string s2 : tmp) {
-            if (s2.size() > 0)
-                strings.push_back(s2);
-        }
-        strings.push_back("\n");
+        strings += s+"\n";
     }
+    build();
     vector<lexem> lexems = analysis(strings);
     for (lexem l : lexems) {
         cout << l.t << " " << l.s << endl;
