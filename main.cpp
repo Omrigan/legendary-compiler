@@ -48,6 +48,9 @@ void build() {
             {'*',  vertex::OPERATOR_END},
             {'/',  vertex::SLASH},
             {'^',  vertex::OPERATOR_END},
+            {'|',  vertex::OPERATOR_END},
+            {'&',  vertex::OPERATOR_END},
+            {'%',  vertex::OPERATOR_END},
             {' ',  vertex::ZERO},
             {'\n', vertex::ZERO},
     };
@@ -141,7 +144,7 @@ vertex go_ahead(vertex cur, char c){
 
 
 
-vector<lexem> analysis(string s) {
+vector<lexem> lexicalAnalysis(string s) {
     vector<lexem> ans;
     vertex curv = vertex::ZERO;
     string s2 = "";
@@ -186,7 +189,10 @@ void run() {
         strings += s+"\n";
     }
     build();
-    vector<lexem> lexems = analysis(strings);
+    vector<lexem> lexems = lexicalAnalysis(strings);
+    //YOUR CODE HERE
+
+
     for (lexem l : lexems) {
         cout << l.t << " " << l.s << endl;
     }

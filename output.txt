@@ -17,3 +17,8 @@
 5 badvarname
 5 _anothervarname
 6 }
+4 **
+4 ==
+4 ++
+4 --
+4 -
