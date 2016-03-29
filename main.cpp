@@ -20,18 +20,6 @@ set<string> signs = {
         "}",
         "."
 };
-vector<string> operators_prior = {
-        "++",
-        "==",
-};
-
-set<string> operators = {
-        "++",
-        "==",
-        "+",
-        "=",
-
-};
 
 struct lexem {
     string s;
@@ -40,48 +28,11 @@ struct lexem {
 
 };
 
-bool isFloatLiteral(string s) {
-    regex re("(\\d*\\.\\d+|\\d+\\.\\d*)f?|\\d+f");
-    return regex_match(s.c_str(), re);
-}
 
-bool isIntLiteral(string s) {
-    regex re("\\d+");
-    return regex_match(s.c_str(), re);
-}
-
-bool isStringLiteral(string s) {
-    regex re("\".*\"");
-    return regex_match(s.c_str(), re);
-}
-
-bool isId(string s) {
-    regex re("[A-Za-z_]+[A-Za-z0-9_-]*");
-    return regex_match(s.c_str(), re);
-}
-
-bool isShortComment(string s) {
-    regex re("//.*");
-    return regex_match(s.c_str(), re);
-}
-
-bool isLongCommentBegiging(string s) {
-    regex re("/\\*.*");
-    return regex_match(s.c_str(), re);
-}
-
-bool isLongCommentEnding(string s) {
-    regex re(".*\\*/");
-    return regex_match(s.c_str(), re);
-}
-
-bool isLineEnding(string s) {
-    return s == "\n";
-}
 
 vector<lexem> analysis(vector<string> strings) {
-    vector<lexem> out;
     bool short_comment = false;
+    vector<lexem> out;
     bool long_comment = false;
     for (string s : strings) {
         lexem l;
