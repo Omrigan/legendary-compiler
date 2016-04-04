@@ -1,20 +1,8 @@
-'c'
-0
-0.5
-.5
-5.
-5f
-.
-"привет"
-150
-124.100
-ю
-var_name
-0badvarname
-/* Long comment
-while
-konez */
-_anothervarname //comment
-
+int main() {
+int x
+x = 3
+bool y
+do {
+ x = x + 3
+} while (y)
 }
-**==++---

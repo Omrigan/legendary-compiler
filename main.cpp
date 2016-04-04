@@ -7,7 +7,8 @@ enum types {
     INT_LITERAL, FLOAT_LITERAL, STRING_LITERAL, BOOL_LITERAL, // 1 2 3 4
     OPERATOR, ID, SIGN, // 5 6 7
     OTHER, // 8
-    SPAM
+    SPAM,
+    NULL_LEXEM
 };
 enum vertex {
     ZERO,
@@ -55,6 +56,8 @@ void build() {
             {'+',  vertex::PLUSMINUS},
             {'=',  vertex::PLUSMINUS},
             {'*',  vertex::PLUSMINUS},
+            {'<',  vertex::PLUSMINUS},
+            {'>',  vertex::PLUSMINUS},
             {'{',  vertex::SIGN_END},
             {'}',  vertex::SIGN_END},
             {'.',  vertex::DOT},
@@ -82,6 +85,8 @@ void build() {
             {'+', vertex::OPERATOR_END},
             {'=', vertex::OPERATOR_END},
             {'*', vertex::OPERATOR_END},
+            {'<', vertex::OPERATOR_END },
+            {'>', vertex::OPERATOR_END }
     };
     edges[vertex::FLOAT] = {
             {'f', vertex::FLOAT_END}
@@ -207,9 +212,17 @@ vector<lexem> lexicalAnalysis(string s) {
 int lexem_number = 0;
 
 void read(){
-    c = lexems[lexem_number];
-    lexem_number++;
+    if(lexem_number>=lexems.size()){
+        lexem c;
+        c.t = NULL_LEXEM;
+        c.s = "";
+    } else {
+        c = lexems[lexem_number];
+        lexem_number++;
+    }
+
 }
+void program();
 
 void run() {
     string strings = "";
@@ -220,16 +233,22 @@ void run() {
     }
     build();
     lexems = lexicalAnalysis(strings);
-
-
     for (lexem l : lexems) {
         cout << l.t << " " << l.s << endl;
     }
+
+
+    read();
+    program();
+    cout<< "Syntax done";
+
+
 
 }
 
 void error(){
     cout << "Syntax error";
+    exit(228);
 }
 
 void var(){
@@ -310,6 +329,7 @@ void expression(){
         if (c.s != "="){
             c.t = t1;
             c.s = c1;
+            read();
             term();
         }
         else {
@@ -324,7 +344,6 @@ void expression(){
 
 void sostoperators(){
     do{
-        read();
         operators();
     } while (c.s != "}");
 }
@@ -364,14 +383,14 @@ void foroperator(){
     }
     else{
         read();
-        if (c.t == ID || c.s == "(" || c.t == FLOAT_LITERAL || c.t == INT_LITERAL || BOOL_LITERAL || c.s == "!" ){
+        if (c.t == ID || c.s == "(" || c.t == FLOAT_LITERAL || c.t == INT_LITERAL || c.t== BOOL_LITERAL || c.s == "!" ){
             expression();
             if (c.s != ";"){
                 error();
             }
             else{
                 read();
-                if (c.t == ID || c.s == "(" || c.t == FLOAT_LITERAL || c.t == INT_LITERAL || BOOL_LITERAL || c.s == "!"){
+                if (c.t == ID || c.s == "(" || c.t == FLOAT_LITERAL || c.t == INT_LITERAL ||  c.t== BOOL_LITERAL || c.s == "!"){
                     expression();
                     if (c.s != ";"){
                         error();
@@ -457,7 +476,9 @@ void coperator(){
 
 void operators(){
     if (c.s=="{"){
+        read();
         sostoperators();
+        read();
     }
     else if (c.s == "do"){
         read();
@@ -474,7 +495,7 @@ void operators(){
         read();
         coperator();
     }
-    else if (c.t == ID || c.s == "(" || c.t == FLOAT_LITERAL || c.t == INT_LITERAL || BOOL_LITERAL || c.s == "!"){
+    else if (c.t == ID || c.s == "(" || c.t == FLOAT_LITERAL || c.t == INT_LITERAL ||  c.t == BOOL_LITERAL || c.s == "!"){
         expression();
     }
     else{
@@ -505,6 +526,7 @@ void program(){
                 error();
             }
             else{
+                read();
                 operators();
             }
         }
