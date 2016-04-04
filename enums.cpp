@@ -1,7 +1,0 @@
-enum types {
-    KEYWORD, //0
-    INT_LITERAL, FLOAT_LITERAL, STRING_LITERAL, BOOL_LITERAL, // 1 2 3 4
-    OPERATOR, ID, SIGN, // 5 6 7
-    OTHER, // 8
-    SPAM
-};

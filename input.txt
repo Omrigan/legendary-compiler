@@ -4,5 +4,5 @@ x = 3
 bool y
 do {
  x = x + 3
-} while (y)
+} while (true)
 }
