@@ -1,8 +1,5 @@
 int main() {
-int x
-x = 3
-bool y
-do {
- x = x + 3
-} while (true)
+    x = 3
+    int x
+    bool y
 }

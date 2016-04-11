@@ -2,7 +2,7 @@
 #include <bits/stdc++.h>
 
 
-#include "types.cpp"
+#include "lexem_types.cpp"
 #include "lexical_analysis.h"
 #include "syntax_analysis.h"
 
@@ -23,11 +23,9 @@ void run() {
     build();
     vector<lexem> lexems = lexicalAnalysis(strings);
     for (lexem l : lexems) {
-        cout << l.t << " " << l.s << endl;
+        cout << l.s << endl;
     }
 
-
-    read();
     program(lexems);
     cout<< "Syntax done";
 

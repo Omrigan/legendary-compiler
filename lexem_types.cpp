@@ -11,7 +11,7 @@
 #include <set>
 #include <map>
 
-enum types {
+enum class lexem_types {
     KEYWORD, //0
     INT_LITERAL, FLOAT_LITERAL, STRING_LITERAL, BOOL_LITERAL, // 1 2 3 4
     OPERATOR, ID, SIGN, // 5 6 7
@@ -19,7 +19,7 @@ enum types {
     SPAM,
     NULL_LEXEM
 };
-enum vertex {
+enum class vertex {
     ZERO,
     COMMENT_SHORT, COMMENT_LONG, COMMENT_END_STAR, COMMENT_END_SLASH,
     STRING, END_STRING,
@@ -34,6 +34,7 @@ enum vertex {
 };
 struct lexem {
     std::string s;
-    types t;
+    lexem_types t;
+    int line;
 };
 #endif //COMPILER_ENUMS_H

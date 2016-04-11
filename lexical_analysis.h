@@ -5,7 +5,7 @@
 #ifndef COMPILER_LEXICAL_ANALYSIS_H
 #define COMPILER_LEXICAL_ANALYSIS_H
 
-#include "types.cpp"
+#include "lexem_types.cpp"
 
 
 
