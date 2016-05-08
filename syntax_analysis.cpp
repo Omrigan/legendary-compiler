@@ -1,6 +1,7 @@
 #include "lexem_types.cpp"
 #include "syntax_analysis.h"
 #include "stack"
+#include "lexical_analysis.h"
 
 
 #include <chrono>
@@ -11,32 +12,20 @@ using namespace std;
 lexem c;
 
 
-typedef map<string, Var_types> id_table;
-id_table ids;
-//stack<set<string>> memory_stack;
-map<string, string> values;
-set<string> assigned;
-
-
-vector<lexem> lexems;
-
-int lexem_number = 0;
-
-map<string, Var_types> string_to_type = {
-        {"int",    Var_types::INT},
-        {"double", Var_types::DOUBLE},
-        {"string", Var_types::STRING},
-        {"bool",   Var_types::BOOL}
+map<string, data_types> string_to_type = {
+        {"int",    data_types::INT},
+        {"double", data_types::DOUBLE},
+        {"bool",   data_types::BOOL}
 };
 
 
-void var() {
+void SyntaxAnalysis::var() {
 
     if (c.s != "int" && c.s != "bool" && c.s != "double" && c.s != "string") {
         error(Error_codes::MISC);
     }
     else {
-        Var_types type = string_to_type[c.s];
+        data_types type = string_to_type[c.s];
         read();
         if (c.t != lexem_types::ID) {
             error(Error_codes::MISC);
@@ -46,8 +35,8 @@ void var() {
                 if (c.t != lexem_types::ID) {
                     error(Error_codes::MISC);
                 } else {
-                    if (ids.find(c.s) == ids.end()) {
-                        ids[c.s] = type;
+                    if (!id_table->is_declared(c.s)) {
+                        id_table->declare(c.s, type);
                     } else {
                         error(Error_codes::ALREADY_DECLARED);
                     }
@@ -58,7 +47,7 @@ void var() {
     }
 }
 
-void specatom() {
+void SyntaxAnalysis::specatom() {
     if (c.t == lexem_types::FLOAT_LITERAL || c.t == lexem_types::INT_LITERAL || c.t == lexem_types::BOOL_LITERAL) {
         read();
     }
@@ -71,9 +60,9 @@ void specatom() {
     }
 }
 
-void atom() {
+void SyntaxAnalysis::atom() {
     if (c.t == lexem_types::ID) {
-        if (values.find(c.s) == values.end())
+        if (!id_table->is_declared(c.s))
             error(Error_codes::NOT_DECLARED);
         read();
 
@@ -93,9 +82,10 @@ void atom() {
     }
 }
 
-void atom1() {
+void SyntaxAnalysis::atom1() {
     atom();
     if (c.s == "^") {
+
         read();
         atom();
     }
@@ -104,18 +94,19 @@ void atom1() {
     }
 }
 
-void term() {
+void SyntaxAnalysis::term() {
     do {
         atom1();
     } while (c.s == "*" || c.s == "/" || c.s == "&&" || c.s == "div" || c.s == "%");
 }
 
-void expression() {
+
+void SyntaxAnalysis::expression() {
     if (c.t == lexem_types::ID) {
         lexem v = c;
         read();
         if (c.s == "=") {
-            if (ids.find(c.s) == ids.end())
+            if (!id_table->is_declared(v.s))
                 error(Error_codes::NOT_DECLARED);
             read();
             expression();
@@ -123,7 +114,6 @@ void expression() {
         }
         else {
             c = v;
-            read();//FIXME: MAY READ GOES AHEAD?
             term();
         }
     }
@@ -132,13 +122,13 @@ void expression() {
     }
 }
 
-void sostoperators() {
+void SyntaxAnalysis::sostoperators() {
     do {
         operators();
     } while (c.s != "}");
 }
 
-void dowhileoperator() {
+void SyntaxAnalysis::dowhileoperator() {
     operators();
     if (c.s != "while") {
         error(Error_codes::MISC);
@@ -161,58 +151,58 @@ void dowhileoperator() {
     }
 }
 
-void direction() {
+void SyntaxAnalysis::direction() {
     if (c.s != "to" && c.s != "downto") {
         error(Error_codes::MISC);
     }
 }
 
-void foroperator() {
+void SyntaxAnalysis::foroperator() {
+
     if (c.s != "(") {
-        error;
+        error(Error_codes::MISC);
     }
     else {
         read();
-        if (c.t == lexem_types::ID || c.s == "(" || c.t == lexem_types::FLOAT_LITERAL ||
-            c.t == lexem_types::INT_LITERAL || c.t == lexem_types::BOOL_LITERAL ||
-            c.s == "!") {
-            expression();
-            if (c.s != ";") {
-                error(Error_codes::MISC);
-            }
-            else {
-                read();
-                if (c.t == lexem_types::ID || c.s == "(" || c.t == lexem_types::FLOAT_LITERAL ||
-                    c.t == lexem_types::INT_LITERAL || c.t == lexem_types::BOOL_LITERAL ||
-                    c.s == "!") {
+        if (c.t == lexem_types::ID) {
+            lexem v = c;
+            read();
+            if (c.s != ":=") {
+                c = v;
+                if (c.s == "int" || c.s == "bool" || c.s == "double") {
+                    var();
                     expression();
                     if (c.s != ";") {
                         error(Error_codes::MISC);
                     }
                     else {
                         read();
-                        if (c.t == lexem_types::ID || c.s == "(" || c.t == lexem_types::FLOAT_LITERAL ||
-                            c.t == lexem_types::INT_LITERAL ||
-                            c.t == lexem_types::BOOL_LITERAL || c.s == "!") {
-                            expression();
-                            if (c.s != ")") {
-                                error(Error_codes::MISC);
-                            }
-                        }
-                        else {
+                        expression();
+                        if (c.s != ")") {
                             error(Error_codes::MISC);
                         }
                     }
                 }
                 else {
-                    error(Error_codes::MISC);
+                    expression();
+                    if (c.s != ";") {
+                        error(Error_codes::MISC);
+                    }
+                    else {
+                        read();
+                        expression();
+                        if (c.s != ";") {
+                            error(Error_codes::MISC);
+                        }
+                        else {
+                            read();
+                            expression();
+                            if (c.s != ")") {
+                                error(Error_codes::MISC);
+                            }
+                        }
+                    }
                 }
-            }
-        }
-        else if (c.t == lexem_types::ID) {
-            read();
-            if (c.s != ":=") {
-                error(Error_codes::MISC);
             }
             else {
                 read();
@@ -223,31 +213,20 @@ void foroperator() {
                     error(Error_codes::MISC);
                 }
             }
-        }
-        else if (c.s == "int" || c.s == "bool" || c.s == "double") {
-            var();
-            expression();
-            if (c.s != ";") {
-                error(Error_codes::MISC);
-            }
-            else {
-                read();
-                expression();
-                if (c.s != ")") {
-                    error(Error_codes::MISC);
-                }
-            }
-        }
-        read();
-        operators();
-        if (c.s == "else") {
+
             read();
             operators();
+            if (c.s == "else") {
+                read();
+                operators();
+            }
         }
     }
 }
 
-void coperator() {
+
+void SyntaxAnalysis::coperator() {
+
     do {
         if (c.s == "<<") {
             read();
@@ -264,13 +243,19 @@ void coperator() {
                 error(Error_codes::MISC);
             }
             else {
-                read();
+                if (id_table->is_declared(c.s)) {
+                    error(Error_codes::NOT_DECLARED);
+                }
+                else {
+                    read();
+                }
             }
         }
     } while (c.s == ">>" || c.s == "<<");
+
 }
 
-void operators() {
+void SyntaxAnalysis::operators() {
     if (c.s == "{") {
         read();
         sostoperators();
@@ -303,12 +288,7 @@ void operators() {
 
 map<Error_codes, string> msg;
 
-void program(vector<lexem> _lexems) {
-    msg[Error_codes::MISC] = "Unknown Error";
-    msg[Error_codes::NOT_DECLARED] = "Variable not declared yet";
-    msg[Error_codes::ALREADY_DECLARED] = "Already declared";
-
-    lexems = _lexems;
+void SyntaxAnalysis::program() {
     read();
     if (c.t != lexem_types::KEYWORD) {
         error(Error_codes::MISC);
@@ -340,7 +320,7 @@ void program(vector<lexem> _lexems) {
 }
 
 
-void read() {
+void SyntaxAnalysis::read() {
     if (lexem_number >= lexems.size()) {
         c.t = lexem_types::NULL_LEXEM;
         c.s = "";
@@ -352,11 +332,26 @@ void read() {
 }
 
 
-void error(Error_codes error) {
+void SyntaxAnalysis::error(Error_codes error) {
 
-    cerr << "Syntax error:" << endl;
-    cerr << msg[error] << endl;
-    cerr << "At line: " << c.line << ". Lexem: '" << c.s << "'" << endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    string err = "Error: %s\nLine: %d. Lexem: '%s'";
+//    logfs << err;
+    fprintf(stderr, err.c_str(), msg[error].c_str(), c.line, c.s.c_str());
     exit(228);
 }
+
+
+SyntaxAnalysis::SyntaxAnalysis(vector<lexem>
+                               _lexems, bool
+                               _need_generate) {
+    id_table = new IdTable();
+    lexems = _lexems;
+    msg[Error_codes::MISC] = "Unknown Error";
+    msg[Error_codes::NOT_DECLARED] = "Variable not declared yet";
+    msg[Error_codes::ALREADY_DECLARED] = "Already declared";
+    need_generate = _need_generate;
+
+}
+
+

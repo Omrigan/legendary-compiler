@@ -9,41 +9,43 @@
 using namespace std;
 
 
+void run(string dir, string input_file) {
+    system(("mkdir " + dir).c_str());
+    ifstream ifs(input_file, std::ifstream::in);
+
+    ofstream lexemfs(dir + "/" + input_file + ".lexems");
+    ofstream logfs(dir + "/" + input_file + ".log");
 
 
 
-
-void run() {
     string strings = "";
-    while (!cin.eof()) {
+    while (!ifs.eof()) {
         string s;
-        getline(cin, s);
-        strings += s+"\n";
+        getline(ifs, s);
+        strings += s + "\n";
     }
     build();
+
     vector<lexem> lexems = lexicalAnalysis(strings);
+    logfs << "Lexical done" << endl;
     for (lexem l : lexems) {
-        cout << l.s << endl;
+        lexemfs << l.s << endl;
     }
-
-    program(lexems);
-    cout<< "Syntax done";
-
+    SyntaxAnalysis analysis(lexems, true);
+    analysis.program();
+    logfs  << "Syntax done";
 
 
 }
 
 
+int main(int argc, char *argv[]) {
+    string s = "input.txt";
+    if (argc > 1) {
+        s = string(argv[1]);
+    }
+    run("out", s);
 
-
-
-
-
-
-
-int main() {
-    freopen("input.txt", "r", stdin);
-    freopen("output.txt", "w", stdout);
-    run();
+    fprintf(stderr,"OK");
     return 0;
 }

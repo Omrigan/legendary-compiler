@@ -6,10 +6,8 @@
 #define COMPILER_SYNTAX_ANALYSIS_H
 
 #include "lexem_types.cpp"
+#include "IdTable.h"
 using namespace std;
-enum class Var_types {
-    INT, DOUBLE, BOOL, STRING
-};
 
 enum class Error_codes {
     ALREADY_DECLARED,
@@ -17,14 +15,46 @@ enum class Error_codes {
     MISC,
 };
 
-void atom();
-void expression();
-void operators();
-void specatom();
-void read();
-void var();
-void program(vector<lexem> lexems);
-void var();
-void error(Error_codes error);
+class SyntaxAnalysis {
+private:
+    IdTable* id_table;
+    set<string> assigned;
+    vector<lexem> lexems;
+
+    int lexem_number = 0;
+    bool need_generate;
+
+    void atom();
+
+    void expression();
+
+    void operators();
+
+    void direction();
+
+    void foroperator();
+
+    void coperator();
+
+    void sostoperators();
+
+    void dowhileoperator();
+
+    void term();
+    void atom1();
+
+    void specatom();
+
+    void read();
+
+    void var();
+
+
+    void error(Error_codes error);
+
+public:
+    SyntaxAnalysis(vector<lexem> _lexems, bool _need_generate);
+    void program();
+};
 
 #endif //COMPILER_SYNTAX_ANALYSIS_H

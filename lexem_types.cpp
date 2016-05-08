@@ -10,6 +10,8 @@
 #include <iostream>
 #include <set>
 #include <map>
+#include <iostream>
+#include <bits/stdc++.h>
 
 enum class lexem_types {
     KEYWORD, //0
@@ -37,4 +39,17 @@ struct lexem {
     lexem_types t;
     int line;
 };
+
+enum class poliz_types {
+    ADDRESS,
+    VALUE,
+};
+enum class data_types {
+    INT, DOUBLE, BOOL
+};
+
+
+
+
+
 #endif //COMPILER_ENUMS_H
