@@ -8,19 +8,23 @@
 #include "lexem_types.cpp"
 #include <string>
 #include <map>
-#include "poliz.h"
+#include "Operands.h"
 
 using namespace std;
 
 class IdTable {
 private:
-    map<string, data_types > ids;
+    map<string, data_types> ids;
     map<string, int> int_values;
-    map<string, int> double_values;
-    map<string, int> bool_values;
+    map<string, double> double_values;
+    map<string, bool> bool_values;
 public:
+    static IdTable *get_table();
+
+    data_types get_data_type(string name);
+
     bool is_declared(string name) {
-        return ids.find(name)!=ids.end();
+        return ids.find(name) != ids.end();
     }
 
     void declare(string name, data_types type) {
@@ -30,8 +34,25 @@ public:
     void set_int_value(string name, int value) {
         int_values[name] = value;
     };
-    void set_bool_value(string name, bool value){
+
+    void set_bool_value(string name, bool value) {
         bool_values[name] = value;
+    }
+
+    void set_double_value(string name, double value) {
+        double_values[name] = value;
+    }
+
+    int get_int_value(string name) {
+        return int_values[name];
+    };
+
+    bool get_bool_value(string name) {
+        return bool_values[name];
+    }
+
+    double get_double_value(string name) {
+        return bool_values[name];
     }
 
 

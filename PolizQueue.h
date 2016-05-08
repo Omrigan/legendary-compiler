@@ -8,7 +8,7 @@
 #ifndef COMPILER_POLIZQUEUE_H
 #define COMPILER_POLIZQUEUE_H
 
-#include "poliz.h"
+#include "Operands.cpp"
 using namespace std;
 class PolizQueue {
 private:

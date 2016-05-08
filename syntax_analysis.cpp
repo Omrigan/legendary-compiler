@@ -6,10 +6,14 @@
 
 #include <chrono>
 #include <thread>
+#include "PolizQueue.h"
+#include "Operations.h"
+#include "Operands.h"
 
 using namespace std;
 
 lexem c;
+
 
 
 map<string, data_types> string_to_type = {
@@ -35,8 +39,8 @@ void SyntaxAnalysis::var() {
                 if (c.t != lexem_types::ID) {
                     error(Error_codes::MISC);
                 } else {
-                    if (!id_table->is_declared(c.s)) {
-                        id_table->declare(c.s, type);
+                    if (!IdTable::get_table()->is_declared(c.s)) {
+                        IdTable::get_table()->declare(c.s, type);
                     } else {
                         error(Error_codes::ALREADY_DECLARED);
                     }
@@ -62,7 +66,7 @@ void SyntaxAnalysis::specatom() {
 
 void SyntaxAnalysis::atom() {
     if (c.t == lexem_types::ID) {
-        if (!id_table->is_declared(c.s))
+        if (!IdTable::get_table()->is_declared(c.s))
             error(Error_codes::NOT_DECLARED);
         read();
 
@@ -86,6 +90,7 @@ void SyntaxAnalysis::atom1() {
     atom();
     if (c.s == "^") {
 
+
         read();
         atom();
     }
@@ -104,10 +109,22 @@ void SyntaxAnalysis::term() {
 void SyntaxAnalysis::expression() {
     if (c.t == lexem_types::ID) {
         lexem v = c;
+
+        data_types d = IdTable::get_table()->get_data_type(v.s);
+        if (d == data_types::BOOL) {
+            pq->add_item(new IdBoolOperand(v.s));
+        }
+        if (d == data_types::INT) {
+            pq->add_item(new IdIntOperand(v.s));
+        }
+        if (d == data_types::DOUBLE) {
+            pq->add_item(new IdDoubleOperand(v.s));
+        }
         read();
         if (c.s == "=") {
-            if (!id_table->is_declared(v.s))
+            if (!IdTable::get_table()->is_declared(v.s))
                 error(Error_codes::NOT_DECLARED);
+            pq->add_item(new Assignation());
             read();
             expression();
             assigned.insert(v.s);
@@ -243,7 +260,7 @@ void SyntaxAnalysis::coperator() {
                 error(Error_codes::MISC);
             }
             else {
-                if (id_table->is_declared(c.s)) {
+                if (IdTable::get_table()->is_declared(c.s)) {
                     error(Error_codes::NOT_DECLARED);
                 }
                 else {
@@ -342,7 +359,7 @@ void SyntaxAnalysis::error(Error_codes error) {
 SyntaxAnalysis::SyntaxAnalysis(vector<lexem>
                                _lexems, bool
                                _need_generate) {
-    id_table = new IdTable();
+    pq = new PolizQueue();
     lexems = _lexems;
     msg[Error_codes::MISC] = "Unknown Error";
     msg[Error_codes::NOT_DECLARED] = "Variable not declared yet";

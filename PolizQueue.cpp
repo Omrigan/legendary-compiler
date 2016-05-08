@@ -3,7 +3,7 @@
 //
 
 #include "PolizQueue.h"
-#include "poliz.h"
+#include "Operands.cpp"
 
 void PolizQueue::add_item(PolizItem *item) {
     if (item->is_operation) {
@@ -46,6 +46,8 @@ Operand PolizQueue::run_type() {
                 Operand res = item_binop->typeEval(left, right);
                 operand_stack.push(&res);
             }
+        } else{
+            operand_stack.push((Operand *) *it);
         }
     }
     return *operand_stack.top();

@@ -7,6 +7,8 @@
 
 #include "lexem_types.cpp"
 #include "IdTable.h"
+#include "PolizQueue.h"
+
 using namespace std;
 
 enum class Error_codes {
@@ -17,9 +19,9 @@ enum class Error_codes {
 
 class SyntaxAnalysis {
 private:
-    IdTable* id_table;
     set<string> assigned;
     vector<lexem> lexems;
+    PolizQueue *pq;
 
     int lexem_number = 0;
     bool need_generate;

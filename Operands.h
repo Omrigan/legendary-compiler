@@ -1,16 +1,15 @@
 //
-// Created by oleg on 4/20/16.
+// Created by oleg on 5/9/16.
 //
 
-#ifndef COMPILER_POLIZ_H
-#define COMPILER_POLIZ_H
+#ifndef COMPILER_OPERANDS_H
+#define COMPILER_OPERANDS_H
 
 #include "IdTable.h"
-
-using namespace std;
+#include "string"
 
 class IdTable;
-
+using namespace std;
 class PolizItem {
 public:
     bool is_operation;
@@ -54,34 +53,46 @@ public:
 
     virtual Operand typeEval(Operand left, Operand right);
 };
-
+class IntOperand;
+class BoolOperand;
+class DoubleOperand;
 class Operand : public PolizItem {
 public:
     bool is_operation = false;
     data_types data_type;
+
     IdTable *id_table;
 
-    Operand(IdTable *_id_table) {
-        id_table = _id_table;
-    }
+    static IntOperand *get_sample_int();
+
+    static BoolOperand *get_sample_bool();
+
+    static DoubleOperand *get_sample_double();
+
 };
 
 
 class IntOperand : public Operand {
 public:
     data_types data_type = data_types::INT;
+
     virtual int get_value();
+
+
 };
 
 class DoubleOperand : public Operand {
 public:
     data_types data_type = data_types::DOUBLE;
+
     virtual double get_value();
 };
 
 class BoolOperand : public Operand {
 public:
     data_types data_type = data_types::BOOL;
+
+
     virtual bool get_value();
 };
 
@@ -90,28 +101,48 @@ class ConstIntOperand : public IntOperand {
 private:
     int value;
 public:
-    int get_value() {
-        return value;
-    }
+    int get_value();
 };
 
 class ConstDoubleOperand : public DoubleOperand {
 private:
     double value;
 public:
-    double get_value() {
-        return value;
-    }
+    double get_value();
 };
 
 class ConstBoolOperand : public BoolOperand {
 private:
     bool value;
 public:
-    bool get_value() {
-        return value;
-    }
+    bool get_value();
 };
 
+class IdBoolOperand : public BoolOperand {
+private:
+    string name;
+public:
+    IdBoolOperand(string _name);
 
-#endif //COMPILER_POLIZ_H
+    bool get_value();
+};
+
+class IdIntOperand : public IntOperand {
+private:
+    string name;
+public:
+    IdIntOperand(string _name);
+
+    int get_value();
+};
+
+class IdDoubleOperand : public DoubleOperand {
+private:
+    string name;
+public:
+    IdDoubleOperand(string _name);
+
+    double get_value();
+};
+
+#endif //COMPILER_OPERANDS_H
