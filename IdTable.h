@@ -31,7 +31,7 @@ public:
         int_values[name] = value;
     };
     void set_bool_value(string name, bool value){
-//        bool_values[name] =
+        bool_values[name] = value;
     }
 
 

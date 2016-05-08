@@ -113,6 +113,8 @@ void build() {
             {'>',  vertex::PLUSMINUS},
             {'{',  vertex::SIGN_END},
             {'}',  vertex::SIGN_END},
+            {'(',  vertex::SIGN_END},
+            {')',  vertex::SIGN_END},
             {'.',  vertex::DOT},
             {',',  vertex::SIGN_END},
             {'[',  vertex::SIGN_END},

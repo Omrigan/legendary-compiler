@@ -333,10 +333,7 @@ void SyntaxAnalysis::read() {
 
 
 void SyntaxAnalysis::error(Error_codes error) {
-
-
     string err = "Error: %s\nLine: %d. Lexem: '%s'";
-//    logfs << err;
     fprintf(stderr, err.c_str(), msg[error].c_str(), c.line, c.s.c_str());
     exit(228);
 }

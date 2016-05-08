@@ -70,21 +70,18 @@ public:
 class IntOperand : public Operand {
 public:
     data_types data_type = data_types::INT;
-
     virtual int get_value();
 };
 
 class DoubleOperand : public Operand {
 public:
     data_types data_type = data_types::DOUBLE;
-
     virtual double get_value();
 };
 
 class BoolOperand : public Operand {
 public:
     data_types data_type = data_types::BOOL;
-
     virtual bool get_value();
 };
 

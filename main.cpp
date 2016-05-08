@@ -10,7 +10,7 @@ using namespace std;
 
 
 void run(string dir, string input_file) {
-    system(("mkdir " + dir).c_str());
+//system(("mkdir " + dir).c_str());
     ifstream ifs(input_file, std::ifstream::in);
 
     ofstream lexemfs(dir + "/" + input_file + ".lexems");
@@ -39,7 +39,9 @@ void run(string dir, string input_file) {
 }
 
 
+
 int main(int argc, char *argv[]) {
+    cin.sync_with_stdio(false);
     string s = "input.txt";
     if (argc > 1) {
         s = string(argv[1]);
