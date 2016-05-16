@@ -132,6 +132,9 @@ void SyntaxAnalysis::expression() {
         else {
             c = v;
             term();
+            while (c.s == "+" || c.s == "-"){
+                term();
+            }
         }
     }
     else {

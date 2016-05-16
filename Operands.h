@@ -7,6 +7,7 @@
 
 #include "IdTable.h"
 #include "string"
+#include "syntax_analysis.cpp"
 
 class IdTable;
 using namespace std;
