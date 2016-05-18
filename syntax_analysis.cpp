@@ -42,6 +42,10 @@ void SyntaxAnalysis::var() {
                     }
                 }
                 read();
+                if (c.s == "="){
+                    read();
+                    specatom();
+                }
             } while (c.s == ",");
         }
     }
@@ -115,16 +119,30 @@ void SyntaxAnalysis::expression() {
         else {
             c = v;
             term();
+            while (c.s == "+" || c.s == "-"){
+                read();
+                term();
+            }
         }
     }
     else {
         term();
+        while (c.s == "+" || c.s == "-"){
+            read();
+            term();
+        }
     }
 }
 
 void SyntaxAnalysis::sostoperators() {
     do {
         operators();
+        if (c.s != ";"){
+            error(Error_codes::MISC);
+        }
+        else{
+            read();
+        }
     } while (c.s != "}");
 }
 
@@ -284,6 +302,7 @@ void SyntaxAnalysis::operators() {
     else {
         error(Error_codes::MISC);
     }
+
 }
 
 map<Error_codes, string> msg;
