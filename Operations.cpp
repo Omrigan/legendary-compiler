@@ -21,6 +21,6 @@ Operand *Plus::evalType(Operand *left, Operand *right) {
         //Else
         return Operand::get_sample_double();
     }
-
 }
+
 

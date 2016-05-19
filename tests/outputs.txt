@@ -1,0 +1,4 @@
+0: correct
+1: correct
+2: error - referenced before assignation
+3: error on line 2

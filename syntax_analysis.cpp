@@ -15,7 +15,6 @@ using namespace std;
 lexem c;
 
 
-
 map<string, data_types> string_to_type = {
         {"int",    data_types::INT},
         {"double", data_types::DOUBLE},
@@ -46,6 +45,10 @@ void SyntaxAnalysis::var() {
                     }
                 }
                 read();
+                if (c.s == "=") {
+                    read();
+                    specatom();
+                }
             } while (c.s == ",");
         }
     }
@@ -132,19 +135,30 @@ void SyntaxAnalysis::expression() {
         else {
             c = v;
             term();
-            while (c.s == "+" || c.s == "-"){
+            while (c.s == "+" || c.s == "-") {
+                read();
                 term();
             }
         }
     }
     else {
         term();
+        while (c.s == "+" || c.s == "-") {
+            read();
+            term();
+        }
     }
 }
 
 void SyntaxAnalysis::sostoperators() {
     do {
         operators();
+        if (c.s != ";") {
+            error(Error_codes::MISC);
+        }
+        else {
+            read();
+        }
     } while (c.s != "}");
 }
 
@@ -304,6 +318,7 @@ void SyntaxAnalysis::operators() {
     else {
         error(Error_codes::MISC);
     }
+
 }
 
 map<Error_codes, string> msg;
@@ -355,7 +370,7 @@ void SyntaxAnalysis::read() {
 void SyntaxAnalysis::error(Error_codes error) {
     string err = "Error: %s\nLine: %d. Lexem: '%s'";
     fprintf(stderr, err.c_str(), msg[error].c_str(), c.line, c.s.c_str());
-    exit(228);
+    //exit(228);
 }
 
 
