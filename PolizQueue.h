@@ -4,11 +4,11 @@
 
 
 #include <queue>
-#include "stack"
+#include <stack>
 #ifndef COMPILER_POLIZQUEUE_H
 #define COMPILER_POLIZQUEUE_H
 
-#include "Operands.cpp"
+#include "Operands.h"
 using namespace std;
 class PolizQueue {
 private:

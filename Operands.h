@@ -2,12 +2,15 @@
 // Created by oleg on 5/9/16.
 //
 
-#ifndef COMPILER_OPERANDS_H
-#define COMPILER_OPERANDS_H
+
+#include "string"
 
 #include "IdTable.h"
-#include "string"
-#include "syntax_analysis.cpp"
+#include "syntax_analysis.h"
+
+
+#ifndef COMPILER_OPERANDS_H
+#define COMPILER_OPERANDS_H
 
 class IdTable;
 using namespace std;
@@ -77,7 +80,7 @@ class IntOperand : public Operand {
 public:
     data_types data_type = data_types::INT;
 
-    virtual int get_value();
+    virtual int get_value() = 0;
 
 
 };
@@ -86,7 +89,7 @@ class DoubleOperand : public Operand {
 public:
     data_types data_type = data_types::DOUBLE;
 
-    virtual double get_value();
+    virtual double get_value() = 0;
 };
 
 class BoolOperand : public Operand {
@@ -94,7 +97,7 @@ public:
     data_types data_type = data_types::BOOL;
 
 
-    virtual bool get_value();
+    virtual bool get_value() = 0;
 };
 
 

@@ -12,7 +12,7 @@
 #include <map>
 #include <iostream>
 #include <bits/stdc++.h>
-
+using namespace std;
 enum class lexem_types {
     KEYWORD, //0
     INT_LITERAL, FLOAT_LITERAL, STRING_LITERAL, BOOL_LITERAL, // 1 2 3 4

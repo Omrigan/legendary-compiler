@@ -2,12 +2,15 @@
 // Created by oleg on 4/4/16.
 //
 
+
+
 #ifndef COMPILER_SYNTAX_ANALYSIS_H
 #define COMPILER_SYNTAX_ANALYSIS_H
 
-#include "lexem_types.cpp"
+#include "lexem_types.h"
 #include "IdTable.h"
 #include "PolizQueue.h"
+
 
 using namespace std;
 
@@ -16,7 +19,7 @@ enum class Error_codes {
     NOT_DECLARED,
     MISC,
 };
-
+class PolizQueue;
 class SyntaxAnalysis {
 private:
     set<string> assigned;
@@ -43,6 +46,7 @@ private:
     void dowhileoperator();
 
     void term();
+
     void atom1();
 
     void specatom();
@@ -56,6 +60,7 @@ private:
 
 public:
     SyntaxAnalysis(vector<lexem> _lexems, bool _need_generate);
+
     void program();
 };
 

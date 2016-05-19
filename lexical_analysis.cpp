@@ -2,7 +2,7 @@
 // Created by oleg on 4/4/16.
 //
 
-#include "lexem_types.cpp"
+#include "lexem_types.h"
 #include "lexical_analysis.h"
 
 

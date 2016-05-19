@@ -6,7 +6,7 @@
 #include "IdTable.h"
 #include "Operands.h"
 
-
+using namespace std;
 int ConstIntOperand::get_value() {
     return value;
 }

@@ -4,10 +4,10 @@
 
 #ifndef COMPILER_IDTABLE_H
 #define COMPILER_IDTABLE_H
-
-#include "lexem_types.cpp"
 #include <string>
 #include <map>
+
+#include "lexem_types.h"
 #include "Operands.h"
 
 using namespace std;

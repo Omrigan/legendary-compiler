@@ -5,6 +5,7 @@
 #ifndef COMPILER_OPERATIONS_H
 #define COMPILER_OPERATIONS_H
 
+#include "Operations.h"
 class Plus : public BinaryOperation {
 public:
     const int priority = 5;

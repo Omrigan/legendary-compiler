@@ -2,7 +2,7 @@
 #include <bits/stdc++.h>
 
 
-#include "lexem_types.cpp"
+#include "lexem_types.h"
 #include "lexical_analysis.h"
 #include "syntax_analysis.h"
 
