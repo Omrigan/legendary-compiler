@@ -41,7 +41,7 @@ void run(string dir, string input_file) {
 
 
 int main(int argc, char *argv[]) {
-    cin.sync_with_stdio(false);
+    cin.sync_with_stdio(true);
     string s = "input.txt";
     if (argc > 1) {
         s = string(argv[1]);

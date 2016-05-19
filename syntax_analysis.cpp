@@ -31,7 +31,7 @@ void SyntaxAnalysis::var() {
             error(Error_codes::MISC);
         }
         else {
-            do {
+            while (true) {
                 if (c.t != lexem_types::ID) {
                     error(Error_codes::MISC);
                 } else {
@@ -42,11 +42,14 @@ void SyntaxAnalysis::var() {
                     }
                 }
                 read();
-                if (c.s == "="){
+                if (c.s == "=") {
                     read();
                     specatom();
                 }
-            } while (c.s == ",");
+                if (c.s != ",")
+                    break;
+                read();
+            }
         }
     }
 }
@@ -74,6 +77,10 @@ void SyntaxAnalysis::atom() {
     else if (c.s == "(") {
         read();
         expression();
+        if (c.s == ">" || c.s == "<" || c.s ==">=" || c.s == "<=" || c.s == "!=" || c.s == "=="){
+            read();
+            expression();
+        }
         if (c.s != ")") {
             error(Error_codes::MISC);
         }
@@ -114,12 +121,17 @@ void SyntaxAnalysis::expression() {
                 error(Error_codes::NOT_DECLARED);
             read();
             expression();
+            if (c.s == ">" || c.s == "<" || c.s ==">=" || c.s == "<=" || c.s == "!=" || c.s == "=="){
+                read();
+                expression();
+            }
             assigned.insert(v.s);
         }
         else {
             c = v;
+            lexem_number--;
             term();
-            while (c.s == "+" || c.s == "-"){
+            while (c.s == "+" || c.s == "-") {
                 read();
                 term();
             }
@@ -127,7 +139,7 @@ void SyntaxAnalysis::expression() {
     }
     else {
         term();
-        while (c.s == "+" || c.s == "-"){
+        while (c.s == "+" || c.s == "-") {
             read();
             term();
         }
@@ -137,10 +149,10 @@ void SyntaxAnalysis::expression() {
 void SyntaxAnalysis::sostoperators() {
     do {
         operators();
-        if (c.s != ";"){
+        if (c.s != ";") {
             error(Error_codes::MISC);
         }
-        else{
+        else {
             read();
         }
     } while (c.s != "}");
@@ -159,6 +171,10 @@ void SyntaxAnalysis::dowhileoperator() {
         else {
             read();
             expression();
+            if (c.s == ">" || c.s == "<" || c.s ==">=" || c.s == "<=" || c.s == "!=" || c.s == "=="){
+                read();
+                expression();
+            }
             if (c.s != ")") {
                 error(Error_codes::MISC);
             }
@@ -187,15 +203,24 @@ void SyntaxAnalysis::foroperator() {
             read();
             if (c.s != ":=") {
                 c = v;
+                lexem_number--;
                 if (c.s == "int" || c.s == "bool" || c.s == "double") {
                     var();
                     expression();
+                    if (c.s == ">" || c.s == "<" || c.s ==">=" || c.s == "<=" || c.s == "!=" || c.s == "=="){
+                        read();
+                        expression();
+                    }
                     if (c.s != ";") {
                         error(Error_codes::MISC);
                     }
                     else {
                         read();
                         expression();
+                        if (c.s == ">" || c.s == "<" || c.s ==">=" || c.s == "<=" || c.s == "!=" || c.s == "=="){
+                            read();
+                            expression();
+                        }
                         if (c.s != ")") {
                             error(Error_codes::MISC);
                         }
@@ -203,18 +228,30 @@ void SyntaxAnalysis::foroperator() {
                 }
                 else {
                     expression();
+                    if (c.s == ">" || c.s == "<" || c.s ==">=" || c.s == "<=" || c.s == "!=" || c.s == "=="){
+                        read();
+                        expression();
+                    }
                     if (c.s != ";") {
                         error(Error_codes::MISC);
                     }
                     else {
                         read();
                         expression();
+                        if (c.s == ">" || c.s == "<" || c.s ==">=" || c.s == "<=" || c.s == "!=" || c.s == "=="){
+                            read();
+                            expression();
+                        }
                         if (c.s != ";") {
                             error(Error_codes::MISC);
                         }
                         else {
                             read();
                             expression();
+                            if (c.s == ">" || c.s == "<" || c.s ==">=" || c.s == "<=" || c.s == "!=" || c.s == "=="){
+                                read();
+                                expression();
+                            }
                             if (c.s != ")") {
                                 error(Error_codes::MISC);
                             }
@@ -225,8 +262,17 @@ void SyntaxAnalysis::foroperator() {
             else {
                 read();
                 expression();
+                if (c.s == ">" || c.s == "<" || c.s ==">=" || c.s == "<=" || c.s == "!=" || c.s == "=="){
+                    read();
+                    expression();
+                }
                 direction();
+                read();
                 expression();
+                if (c.s == ">" || c.s == "<" || c.s ==">=" || c.s == "<=" || c.s == "!=" || c.s == "=="){
+                    read();
+                    expression();
+                }
                 if (c.s != ")") {
                     error(Error_codes::MISC);
                 }
@@ -250,6 +296,10 @@ void SyntaxAnalysis::coperator() {
             read();
             if (c.s != "\"" && c.s != "endl") {
                 expression();
+                if (c.s == ">" || c.s == "<" || c.s ==">=" || c.s == "<=" || c.s == "!=" || c.s == "=="){
+                    read();
+                    expression();
+                }
             }
             else {
                 read();
@@ -298,6 +348,10 @@ void SyntaxAnalysis::operators() {
              c.t == lexem_types::INT_LITERAL || c.t == lexem_types::BOOL_LITERAL ||
              c.s == "!") {
         expression();
+        if (c.s == ">" || c.s == "<" || c.s ==">=" || c.s == "<=" || c.s == "!=" || c.s == "=="){
+            read();
+            expression();
+        }
     }
     else {
         error(Error_codes::MISC);
@@ -354,6 +408,7 @@ void SyntaxAnalysis::read() {
 void SyntaxAnalysis::error(Error_codes error) {
     string err = "Error: %s\nLine: %d. Lexem: '%s'";
     fprintf(stderr, err.c_str(), msg[error].c_str(), c.line, c.s.c_str());
+
     exit(228);
 }
 

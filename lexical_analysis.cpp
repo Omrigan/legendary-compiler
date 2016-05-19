@@ -108,6 +108,7 @@ void build() {
             {'-',  vertex::PLUSMINUS},
             {'+',  vertex::PLUSMINUS},
             {'=',  vertex::PLUSMINUS},
+            {':', vertex::PLUSMINUS},
             {'*',  vertex::PLUSMINUS},
             {'<',  vertex::PLUSMINUS},
             {'>',  vertex::PLUSMINUS},
@@ -122,8 +123,8 @@ void build() {
             {'*',  vertex::OPERATOR_END},
             {'/',  vertex::SLASH},
             {'^',  vertex::OPERATOR_END},
-            {'|',  vertex::OPERATOR_END},
-            {'&',  vertex::OPERATOR_END},
+            {'||',  vertex::OPERATOR_END},
+            {'&&',  vertex::OPERATOR_END},
             {'%',  vertex::OPERATOR_END},
             {' ',  vertex::ZERO},
             {'\n', vertex::ZERO},
@@ -141,7 +142,8 @@ void build() {
             {'=', vertex::OPERATOR_END},
             {'*', vertex::OPERATOR_END},
             {'<', vertex::OPERATOR_END },
-            {'>', vertex::OPERATOR_END }
+            {'>', vertex::OPERATOR_END },
+            {'=', vertex::OPERATOR_END}
     };
     edges[vertex::FLOAT] = {
             {'f', vertex::FLOAT_END}
