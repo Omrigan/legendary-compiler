@@ -56,6 +56,6 @@ int main(int argc, char *argv[]) {
     }
     run("out", s);
 
-    fprintf(stderr,"OK");
+//fprintf(stderr,"OK");
     return 0;
 }

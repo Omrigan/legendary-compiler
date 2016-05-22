@@ -10,8 +10,8 @@
 void Generation::build() {
     priority["--"] = 2;
     priority["++"] = 2;
-    priority["**"] = 3;
-    priority["!"] = 3; //right
+    priority["**"] = 3; //right
+    priority["!"] = 3;
     priority["*"] = 5;
     priority["/"] = 5;
     priority["%"] = 5;
@@ -39,13 +39,26 @@ vector<rpn_item> Generation::get_poliz(int start, int end) {
     stack<rpn_item> operations;
     vector<rpn_item> poliz;
     stack<my_cycle> go_back;
+    rpn_types context_type;
     my_cycle m;
     go_back.push(m);
     for (int i = start; i < end; i++) {
         if (lexems[i].t == lexem_types::ID) {
             rpn_item pol;
             pol.type = rpn_types::VAR;
+
             pol.name = lexems[i].s;
+            if (id_table.find(pol.name) == id_table.end()) {
+                if (context_type == rpn_types::BOOL)
+                    id_table[pol.name] = rpn_item::get_bool_item(false);
+                if (context_type == rpn_types::INT)
+                    id_table[pol.name] = rpn_item::get_int_item(0);
+                if (context_type == rpn_types::DOUBLE)
+                    id_table[pol.name] = rpn_item::get_double_item(0);
+
+            }
+
+
             poliz.push_back(pol);
         } else if (lexems[i].t == lexem_types::INT_LITERAL) {
             rpn_item pol;
@@ -140,6 +153,12 @@ vector<rpn_item> Generation::get_poliz(int start, int end) {
                 rpn_item pol;
                 pol.type = rpn_types::CINOUT;
                 operations.push(pol);
+            } else if (lexems[i].s == "bool") {
+                context_type = rpn_types::BOOL;
+            } else if (lexems[i].s == "int") {
+                context_type = rpn_types::INT;
+            } else if (lexems[i].s == "double") {
+                context_type = rpn_types::DOUBLE;
             }
 
         } else if (lexems[i].t == lexem_types::SIGN) {
@@ -208,7 +227,7 @@ void Generation::run() {
         } else if (rpn_queue[cur].type == rpn_types::DOUBLE) {
             eval.push(rpn_queue[cur]);
         } else if (rpn_queue[cur].type == rpn_types::BOOL or
-                rpn_queue[cur].type == rpn_types::STRING ) {
+                   rpn_queue[cur].type == rpn_types::STRING) {
             eval.push(rpn_queue[cur]);
         }
         else if (rpn_queue[cur].type == rpn_types::VAR) {
@@ -321,6 +340,26 @@ void Generation::run() {
                     eval.push(it);
                 }
             }
+            if (rpn_queue[cur].name == "/") {
+                rpn_item p2 = get_value(eval.top());
+                eval.pop();
+                rpn_item p1 = get_value(eval.top());
+                eval.pop();
+
+                if (p1.type == rpn_types::INT) {
+                    if (p2.type == rpn_types::INT) {
+                        eval.push(rpn_item::get_int_item(p1.int_val / p2.int_val));
+                    } else if (p2.type == rpn_types::DOUBLE) {
+                        eval.push(rpn_item::get_double_item(p1.int_val / p2.double_val));
+                    }
+                } else if (p1.type == rpn_types::DOUBLE) {
+                    if (p2.type == rpn_types::INT) {
+                        eval.push(rpn_item::get_double_item(p1.double_val / p2.int_val));
+                    } else if (p2.type == rpn_types::DOUBLE) {
+                        eval.push(rpn_item::get_double_item(p1.double_val / p2.double_val));
+                    }
+                }
+            }
             if (rpn_queue[cur].name == "<<") {
                 rpn_item p2 = get_value(eval.top());
                 eval.pop();
@@ -334,10 +373,39 @@ void Generation::run() {
                         cout << p2.int_val;
                     } else if (p2.type == rpn_types::BOOL) {
                         cout << p2.bool_val;
-                    }else if (p2.type == rpn_types::STRING) {
+                    } else if (p2.type == rpn_types::STRING) {
                         cout << p2.string_val;
                     }
                     eval.push(p1);
+                } else if (p1.type == rpn_types::INT) {
+                    if (p2.type == rpn_types::INT) {
+                        eval.push(rpn_item::get_int_item(p1.int_val << p2.int_val));
+                    }
+                }
+
+            }
+            if (rpn_queue[cur].name == ">>") {
+                rpn_item p2 = eval.top();
+                eval.pop();
+                rpn_item p1 = eval.top();
+                eval.pop();
+
+                if (p1.type == rpn_types::CINOUT) {
+                    if (p2.type == rpn_types::VAR) {
+                        rpn_types cur_t = id_table[p2.name].type;
+                        if (cur_t == rpn_types::INT) {
+                            cin >> id_table[p2.name].int_val;
+                        } else if (cur_t == rpn_types::DOUBLE) {
+                            cin >> id_table[p2.name].double_val;
+                        }
+
+
+                    }
+                    eval.push(p1);
+                } else if (p1.type == rpn_types::INT) {
+                    if (p2.type == rpn_types::INT) {
+                        eval.push(rpn_item::get_int_item(p1.int_val >> p2.int_val));
+                    }
                 }
 
             }
@@ -374,6 +442,19 @@ void Generation::run() {
                     id_table[p1.name].int_val++;
                 } else if (id_table[p1.name].type == rpn_types::DOUBLE) {
                     id_table[p1.name].double_val++;
+                }
+            }
+            if (rpn_queue[cur].name == "--") {
+
+                rpn_item p1 = eval.top();
+
+
+                rpn_item res;
+
+                if (id_table[p1.name].type == rpn_types::INT) {
+                    id_table[p1.name].int_val--;
+                } else if (id_table[p1.name].type == rpn_types::DOUBLE) {
+                    id_table[p1.name].double_val--;
                 }
             }
             if (rpn_queue[cur].name == "=") {
