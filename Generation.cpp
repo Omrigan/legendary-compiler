@@ -31,8 +31,11 @@ void Generation::build() {
 }
 
 struct my_cycle {
-    int x_go, y_go, z;
-    int c1, c2;
+    int x_go, //before else substitute
+            y_go, // after else substitute
+            z; //second cycle position
+    int c1, c2; //third section range
+    bool is_else_begun;
 };
 
 vector<rpn_item> Generation::get_poliz(int start, int end) {
@@ -120,7 +123,7 @@ vector<rpn_item> Generation::get_poliz(int start, int end) {
                 }
 
                 rpn_item p1;
-                p1.type = rpn_types::NUM;
+                p1.type = rpn_types::POS;
                 poliz.push_back(p1);
                 my_cycle cyc;
                 cyc.x_go = poliz.size() - 1;
@@ -132,7 +135,7 @@ vector<rpn_item> Generation::get_poliz(int start, int end) {
                     poliz.push_back(p);
                 }
                 p1;
-                p1.type = rpn_types::NUM;
+                p1.type = rpn_types::POS;
                 poliz.push_back(p1);
                 cyc.y_go = poliz.size() - 1;
                 p1.type = rpn_types::COND;
@@ -170,14 +173,14 @@ vector<rpn_item> Generation::get_poliz(int start, int end) {
                     poliz.push_back(p);
                 }
                 rpn_item poliz_item1;
-                poliz_item1.type = rpn_types::NUM;
+                poliz_item1.type = rpn_types::POS;
                 poliz_item1.int_val = p.z;
                 poliz.push_back(poliz_item1);
                 poliz_item1.type = rpn_types::UNCOND;
                 poliz.push_back(poliz_item1);
 
-                assert(poliz[p.x_go].type == rpn_types::NUM);
-                assert(poliz[p.y_go].type == rpn_types::NUM);
+                assert(poliz[p.x_go].type == rpn_types::POS);
+                assert(poliz[p.y_go].type == rpn_types::POS);
                 poliz[p.x_go].int_val = poliz.size();
                 poliz[p.y_go].int_val = poliz.size();
 
@@ -232,7 +235,7 @@ void Generation::run() {
         }
         else if (rpn_queue[cur].type == rpn_types::VAR) {
             eval.push(rpn_queue[cur]);
-        } else if (rpn_queue[cur].type == rpn_types::NUM) {
+        } else if (rpn_queue[cur].type == rpn_types::POS) {
             eval.push(rpn_queue[cur]);
         } else if (rpn_queue[cur].type == rpn_types::CINOUT) {
             eval.push(rpn_queue[cur]);
