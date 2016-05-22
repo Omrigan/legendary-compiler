@@ -166,24 +166,38 @@ vector<rpn_item> Generation::get_poliz(int start, int end) {
 
         } else if (lexems[i].t == lexem_types::SIGN) {
             if (lexems[i].s == "}") {
-                auto p = go_back.top();
-                go_back.pop();
-                vector<rpn_item> pol = get_poliz(p.c1, p.c2);
-                for (rpn_item p : pol) {
-                    poliz.push_back(p);
+                if (go_back.top().is_else_begun) {
+
+                    assert(poliz[go_back.top().y_go].type == rpn_types::POS);
+                    poliz[go_back.top().y_go].int_val = poliz.size();
+                    go_back.pop();
+
+                } else {
+                    auto p = go_back.top();
+                    vector<rpn_item> pol = get_poliz(p.c1, p.c2);
+                    for (rpn_item p : pol) {
+                        poliz.push_back(p);
+                    }
+                    rpn_item poliz_item1;
+                    poliz_item1.type = rpn_types::POS;
+                    poliz_item1.int_val = p.z;
+                    poliz.push_back(poliz_item1);
+                    poliz_item1.type = rpn_types::UNCOND;
+                    poliz.push_back(poliz_item1);
+
+                    assert(poliz[p.x_go].type == rpn_types::POS);
+                    poliz[p.x_go].int_val = poliz.size();
+                    if (lexems[i + 1].s == "else") {
+                        go_back.top().is_else_begun = true;
+                        i++;
+                    } else {
+                        go_back.pop();
+
+                        assert(poliz[p.y_go].type == rpn_types::POS);
+
+                        poliz[p.y_go].int_val = poliz.size();
+                    }
                 }
-                rpn_item poliz_item1;
-                poliz_item1.type = rpn_types::POS;
-                poliz_item1.int_val = p.z;
-                poliz.push_back(poliz_item1);
-                poliz_item1.type = rpn_types::UNCOND;
-                poliz.push_back(poliz_item1);
-
-                assert(poliz[p.x_go].type == rpn_types::POS);
-                assert(poliz[p.y_go].type == rpn_types::POS);
-                poliz[p.x_go].int_val = poliz.size();
-                poliz[p.y_go].int_val = poliz.size();
-
             } else if (lexems[i].s == "(") {
                 rpn_item pol;
                 pol.type = rpn_types::OPERATION;

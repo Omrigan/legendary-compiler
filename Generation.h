@@ -6,7 +6,7 @@
 #define COMPILER_GENERATION_H
 
 #include "lexical_analysis.h"
-#include "map"
+#include <map>
 
 
 enum class rpn_types {
