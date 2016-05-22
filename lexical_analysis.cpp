@@ -12,7 +12,7 @@ map<vertex, lexem_types> terminals;
 
 
 set<string> keywords = {
-        "for", "do", "while", "int", "boll", "double", "main", "else", "to", "downto", "cinout"
+        "for", "do", "while", "int",  "double", "main", "else", "to", "downto", "cinout"
 };
 
 set<string> bools_literal = {
@@ -123,8 +123,8 @@ void build() {
             {'*',  vertex::OPERATOR_END},
             {'/',  vertex::SLASH},
             {'^',  vertex::OPERATOR_END},
-            {'||',  vertex::OPERATOR_END},
-            {'&&',  vertex::OPERATOR_END},
+            {'|',  vertex::OPERATOR_END},
+            {'&',  vertex::OPERATOR_END},
             {'%',  vertex::OPERATOR_END},
             {' ',  vertex::ZERO},
             {'\n', vertex::ZERO},

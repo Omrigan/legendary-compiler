@@ -2,9 +2,7 @@ int main() {
 
     int b, a;
     for(a = 0; a<10; a++){
-        for(b := 0 to 10){
-            cinout << a*b;
-        }
+        cinout << a*b;
     }
 
 }
