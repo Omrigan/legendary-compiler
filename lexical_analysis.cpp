@@ -2,7 +2,7 @@
 // Created by oleg on 4/4/16.
 //
 
-#include "lexem_types.cpp"
+#include "lexem_types.h"
 #include "lexical_analysis.h"
 
 
@@ -120,6 +120,7 @@ void build() {
             {',',  vertex::SIGN_END},
             {'[',  vertex::SIGN_END},
             {']',  vertex::SIGN_END},
+            {';',  vertex::SIGN_END},
             {'*',  vertex::OPERATOR_END},
             {'/',  vertex::SLASH},
             {'^',  vertex::OPERATOR_END},

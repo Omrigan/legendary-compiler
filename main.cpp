@@ -2,9 +2,10 @@
 #include <bits/stdc++.h>
 
 
-#include "lexem_types.cpp"
+#include "lexem_types.h"
 #include "lexical_analysis.h"
 #include "syntax_analysis.h"
+#include "Generation.h"
 
 using namespace std;
 
@@ -32,8 +33,15 @@ void run(string dir, string input_file) {
         lexemfs << l.s << endl;
     }
     SyntaxAnalysis analysis(lexems, true);
-    analysis.program();
+    //analysis.program();
     logfs  << "Syntax done";
+    Generation gen;
+
+    gen.lexems = lexems;
+    gen.build();
+    gen.dump_to_file(dir + "/" + input_file + ".poliz");
+    cerr << "Rpn builded" << endl;
+    gen.run();
 
 
 }

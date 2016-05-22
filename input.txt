@@ -1,8 +1,10 @@
 int main() {
-
-    int b, a;
-    for(a = 0; a<10; a++){
-        cinout << a*b;
+    int i, j;
+    for(i = 1; i<10; i++){
+        for(j = 1; j<10; j++){
+            cinout << i*j;
+        }
     }
+
 
 }

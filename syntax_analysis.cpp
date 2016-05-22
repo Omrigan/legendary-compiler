@@ -1,4 +1,4 @@
-#include "lexem_types.cpp"
+#include "lexem_types.h"
 #include "syntax_analysis.h"
 #include "stack"
 #include "lexical_analysis.h"

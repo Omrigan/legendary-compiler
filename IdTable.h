@@ -1,11 +1,8 @@
-//
-// Created by oleg on 4/21/16.
-//
 
 #ifndef COMPILER_IDTABLE_H
 #define COMPILER_IDTABLE_H
 
-#include "lexem_types.cpp"
+#include "lexem_types.h"
 #include <string>
 #include <map>
 #include "poliz.h"
@@ -16,8 +13,8 @@ class IdTable {
 private:
     map<string, data_types > ids;
     map<string, int> int_values;
-    map<string, double> double_values;
-    map<string, bool> bool_values;
+    map<string, int> double_values;
+    map<string, int> bool_values;
 public:
     bool is_declared(string name) {
         return ids.find(name)!=ids.end();

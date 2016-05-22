@@ -26,94 +26,366 @@ void Generation::build() {
     priority["^"] = 11;
     priority["|"] = 12;
     priority["="] = 15; //right
-    poliz = get_poliz(5, lexems.size()-1);
+    rpn_queue = get_poliz(5, lexems.size() - 1);
 
 }
-vector<poliz_item> Generation::get_poliz(int start, int end) {
-    stack<poliz_item> operations;
-    vector<poliz_item> poliz;
-    stack<pair<int, int>> go_back;
-    for(int i = start; i< end; i++){
-        if(lexems[i].t==lexem_types::ID){
-            poliz_item pol;
-            pol.type = PolizTypes::VAR;
+
+struct my_cycle {
+    int x_go, y_go, z;
+    int c1, c2;
+};
+
+vector<rpn_item> Generation::get_poliz(int start, int end) {
+    stack<rpn_item> operations;
+    vector<rpn_item> poliz;
+    stack<my_cycle> go_back;
+    my_cycle m;
+    go_back.push(m);
+    for (int i = start; i < end; i++) {
+        if (lexems[i].t == lexem_types::ID) {
+            rpn_item pol;
+            pol.type = rpn_types::VAR;
             pol.name = lexems[i].s;
             poliz.push_back(pol);
-        }else if(lexems[i].t==lexem_types::INT_LITERAL){
-            poliz_item pol;
-            pol.type = PolizTypes::INT;
+        } else if (lexems[i].t == lexem_types::INT_LITERAL) {
+            rpn_item pol;
+            pol.type = rpn_types::INT;
             pol.int_val = atoi(lexems[i].s.c_str());
             poliz.push_back(pol);
-        }else if(lexems[i].t==lexem_types::BOOL_LITERAL){
-            poliz_item pol;
-            pol.type = PolizTypes::BOOL;
-            if(lexems[i].s=="true"){
+        } else if (lexems[i].t == lexem_types::BOOL_LITERAL) {
+            rpn_item pol;
+            pol.type = rpn_types::BOOL;
+            if (lexems[i].s == "true") {
                 pol.bool_val = true;
-            } else{
+            } else {
                 pol.bool_val = false;
             }
             poliz.push_back(pol);
-        }else if(lexems[i].t==lexem_types::FLOAT_LITERAL){
-            poliz_item pol;
-            pol.type = PolizTypes::DOUBLE;
+        } else if (lexems[i].t == lexem_types::FLOAT_LITERAL) {
+            rpn_item pol;
+            pol.type = rpn_types::DOUBLE;
             pol.double_val = atof(lexems[i].s.c_str());
             poliz.push_back(pol);
-        } else if(lexems[i].t==lexem_types::OPERATOR){
+        } else if (lexems[i].t == lexem_types::OPERATOR) {
             int curp = priority[lexems[i].s];
-            bool right_assoc = curp==3 or
-                    curp==15;
-            while(operations.size()>0 and operations.top().name!="(" and
-                        (priority[operations.top().name] < curp or
-                        (right_assoc and priority[operations.top().name] == curp))) {
+            bool right_assoc = curp == 3 or
+                               curp == 15;
+            while (operations.size() > 0 and operations.top().name != "(" and
+                   (priority[operations.top().name] < curp or
+                    (right_assoc and priority[operations.top().name] == curp))) {
                 poliz.push_back(operations.top());
                 operations.pop();
             }
-            poliz_item pol;
-            pol.type = PolizTypes::OPERATION;
+            rpn_item pol;
+            pol.type = rpn_types::OPERATION;
             pol.name = lexems[i].s;
             operations.push(pol);
-        } else if(lexems[i].t==lexem_types::KEYWORD){
-            if(lexems[i].s=="for"){
-                int i1 = i+1;
-                while(lexems[i1].s!=";"){
+        } else if (lexems[i].t == lexem_types::KEYWORD) {
+            if (lexems[i].s == "for") {
+                int i1 = i + 1;
+                while (lexems[i1].s != ";") {
                     i1++;
                 }
-                vector<poliz_item> pol = get_poliz(i+2, i1);
-                for(poliz_item p : pol){
+                vector<rpn_item> pol = get_poliz(i + 2, i1);
+                for (rpn_item p : pol) {
                     poliz.push_back(p);
                 }
                 i1++;
                 i = i1;
-                while(lexems[i1].s!=";"){
+                while (lexems[i1].s != ";") {
                     i1++;
                 }
 
                 pol = get_poliz(i, i1);
-                for(poliz_item p : pol){
+                for (rpn_item p : pol) {
                     poliz.push_back(p);
                 }
-                poliz_item p1;
-                p1.type = PolizTypes::NUM;
+
+                rpn_item p1;
+                p1.type = rpn_types::NUM;
                 poliz.push_back(p1);
-                int x = poliz.size()-1;
-                p1.type =  PolizTypes::COND;
+                my_cycle cyc;
+                cyc.x_go = poliz.size() - 1;
+                p1.type = rpn_types::COND;
                 poliz.push_back(p1);
 
-
-                for(poliz_item p : pol){
+                cyc.z = poliz.size();
+                for (rpn_item p : pol) {
                     poliz.push_back(p);
                 }
                 p1;
-                p1.type = PolizTypes::NUM;
+                p1.type = rpn_types::NUM;
                 poliz.push_back(p1);
-                int y = poliz.size()-1;
-                p1.type =  PolizTypes::COND;
+                cyc.y_go = poliz.size() - 1;
+                p1.type = rpn_types::COND;
                 poliz.push_back(p1);
-                go_back.push(make_pair(0, y));
-                go_back.push(make_pair(1, x));
+
+                i = i1;
+                i++;
+                i1 = i + 1;
+                while (lexems[i1].s != ")") {
+                    i1++;
+                }
+                cyc.c1 = i;
+                cyc.c2 = i1;
+                go_back.push(cyc);
+                i = i1;
+                i++;
+            } else if (lexems[i].s == "cinout") {
+                rpn_item pol;
+                pol.type = rpn_types::CINOUT;
+                operations.push(pol);
+            }
+
+        } else if (lexems[i].t == lexem_types::SIGN) {
+            if (lexems[i].s == "}") {
+                auto p = go_back.top();
+                go_back.pop();
+                vector<rpn_item> pol = get_poliz(p.c1, p.c2);
+                for (rpn_item p : pol) {
+                    poliz.push_back(p);
+                }
+                rpn_item poliz_item1;
+                poliz_item1.type = rpn_types::NUM;
+                poliz_item1.int_val = p.z;
+                poliz.push_back(poliz_item1);
+                poliz_item1.type = rpn_types::UNCOND;
+                poliz.push_back(poliz_item1);
+
+                assert(poliz[p.x_go].type == rpn_types::NUM);
+                assert(poliz[p.y_go].type == rpn_types::NUM);
+                poliz[p.x_go].int_val = poliz.size();
+                poliz[p.y_go].int_val = poliz.size();
+
+            } else if (lexems[i].s == "(") {
+                rpn_item pol;
+                pol.type = rpn_types::OPERATION;
+                pol.name = lexems[i].s;
+                operations.push(pol);
+            } else if (lexems[i].s == ")") {
+                while (operations.top().name != "(") {
+                    poliz.push_back(operations.top());
+                    operations.pop();
+                }
+                operations.pop();
+            } else if (lexems[i].s == ";") {
+                while (!operations.empty()) {
+                    poliz.push_back(operations.top());
+                    operations.pop();
+                }
             }
         }
 
     }
+    while (!operations.empty()) {
+        poliz.push_back(operations.top());
+        operations.pop();
+    }
     return poliz;
 };
+
+void Generation::dump_to_file(string s) {
+    ofstream rpnfs(s);
+    int cur = 0;
+    for (auto it : rpn_queue) {
+        rpnfs << cur << " " << names[it.type] << " " << it.name << " " << it.bool_val <<
+        " " << it.int_val << " " << it.double_val << endl;
+        cur++;
+    }
+}
+
+void Generation::run() {
+    int cur = 0;
+    stack<rpn_item> eval;
+    while (cur < this->rpn_queue.size()) {
+        if (rpn_queue[cur].type == rpn_types::INT) {
+            eval.push(rpn_queue[cur]);
+        } else if (rpn_queue[cur].type == rpn_types::DOUBLE) {
+            eval.push(rpn_queue[cur]);
+        } else if (rpn_queue[cur].type == rpn_types::BOOL) {
+            eval.push(rpn_queue[cur]);
+        }
+        else if (rpn_queue[cur].type == rpn_types::VAR) {
+            eval.push(rpn_queue[cur]);
+        } else if (rpn_queue[cur].type == rpn_types::NUM) {
+            eval.push(rpn_queue[cur]);
+        } else if (rpn_queue[cur].type == rpn_types::CINOUT) {
+            eval.push(rpn_queue[cur]);
+        } else if (rpn_queue[cur].type == rpn_types::UNCOND) {
+            cur = eval.top().int_val - 1;
+            eval.pop();
+        } else if (rpn_queue[cur].type == rpn_types::COND) {
+            int tmp = eval.top().int_val - 1;
+            eval.pop();
+            if (!eval.top().bool_val) {
+                cur = tmp;
+            }
+            eval.pop();
+        } else if (rpn_queue[cur].type == rpn_types::OPERATION) {
+            if (rpn_queue[cur].name == "+") {
+                rpn_item p2 = get_value(eval.top());
+                eval.pop();
+                rpn_item p1 = get_value(eval.top());
+                eval.pop();
+                double result = 0;
+                bool is_double = false;
+                if (p1.type == rpn_types::DOUBLE) {
+                    is_double = true;
+                    result += p1.double_val;
+                } else {
+                    result += p1.int_val;
+                }
+                if (p2.type == rpn_types::DOUBLE) {
+                    is_double = true;
+                    result += p2.double_val;
+                } else {
+                    result += p2.int_val;
+                }
+                if (is_double) {
+                    rpn_item it;
+                    it.type = rpn_types::DOUBLE;
+                    it.double_val = result;
+                    eval.push(it);
+                } else {
+                    rpn_item it;
+                    it.type = rpn_types::INT;
+                    it.int_val = result;
+                    eval.push(it);
+                }
+            }
+            if (rpn_queue[cur].name == "-") {
+                rpn_item p2 = get_value(eval.top());
+                eval.pop();
+                rpn_item p1 = get_value(eval.top());
+                eval.pop();
+                double result = 0;
+                bool is_double = false;
+                if (p1.type == rpn_types::DOUBLE) {
+                    is_double = true;
+                    result += p1.double_val;
+                } else {
+                    result += p1.int_val;
+                }
+                if (p2.type == rpn_types::DOUBLE) {
+                    is_double = true;
+                    result -= p2.double_val;
+                } else {
+                    result -= p2.int_val;
+                }
+                if (is_double) {
+                    rpn_item it;
+                    it.type = rpn_types::DOUBLE;
+                    it.double_val = result;
+                    eval.push(it);
+                } else {
+                    rpn_item it;
+                    it.type = rpn_types::INT;
+                    it.int_val = result;
+                    eval.push(it);
+                }
+            }
+            if (rpn_queue[cur].name == "*") {
+                rpn_item p2 = get_value(eval.top());
+                eval.pop();
+                rpn_item p1 = get_value(eval.top());
+                eval.pop();
+                double result = 1;
+                bool is_double = false;
+                if (p1.type == rpn_types::DOUBLE) {
+                    is_double = true;
+                    result *= p1.double_val;
+                } else {
+                    result *= p1.int_val;
+                }
+                if (p2.type == rpn_types::DOUBLE) {
+                    is_double = true;
+                    result *= p2.double_val;
+                } else {
+                    result *= p2.int_val;
+                }
+                if (is_double) {
+                    rpn_item it;
+                    it.type = rpn_types::DOUBLE;
+                    it.double_val = result;
+                    eval.push(it);
+                } else {
+                    rpn_item it;
+                    it.type = rpn_types::INT;
+                    it.int_val = result;
+                    eval.push(it);
+                }
+            }
+            if (rpn_queue[cur].name == "<<") {
+                rpn_item p2 = get_value(eval.top());
+                eval.pop();
+                rpn_item p1 = get_value(eval.top());
+                eval.pop();
+
+                if (p1.type == rpn_types::CINOUT) {
+                    if (p2.type == rpn_types::DOUBLE) {
+                        cout << p2.double_val;
+                    } else if (p2.type == rpn_types::INT) {
+                        cout << p2.int_val;
+                    } else if (p2.type == rpn_types::BOOL) {
+                        cout << p2.bool_val;
+                    }
+                    eval.push(p1);
+                }
+
+            }
+            if (rpn_queue[cur].name == "<") {
+                rpn_item p2 = get_value(eval.top());
+                eval.pop();
+                rpn_item p1 = get_value(eval.top());
+                eval.pop();
+
+                bool res;
+                if (p1.type == rpn_types::DOUBLE) {
+                    if (p2.type == rpn_types::DOUBLE) {
+                        res = p1.double_val < p2.double_val;
+                    } else if (p2.type == rpn_types::INT) {
+                        res = p1.double_val < p2.int_val;
+                    }
+                } else if (p2.type == rpn_types::INT) {
+                    if (p2.type == rpn_types::DOUBLE) {
+                        res = p1.int_val < p2.double_val;
+                    } else if (p2.type == rpn_types::INT) {
+                        res = p1.int_val < p2.int_val;
+                    }
+                }
+                eval.push(rpn_item::get_bool_item(res));
+            }
+            if (rpn_queue[cur].name == "++") {
+
+                rpn_item p1 = eval.top();
+
+
+                rpn_item res;
+
+                if (id_table[p1.name].type == rpn_types::INT) {
+                    id_table[p1.name].int_val++;
+                } else if (id_table[p1.name].type == rpn_types::DOUBLE) {
+                    id_table[p1.name].double_val++;
+                }
+            }
+            if (rpn_queue[cur].name == "=") {
+                rpn_item p2 = get_value(eval.top());
+                eval.pop();
+                rpn_item p1 = eval.top();
+                eval.pop();
+
+
+                if (p2.type == rpn_types::BOOL) {
+                    id_table[p1.name] = rpn_item::get_bool_item(p2.bool_val);
+                } else if (p2.type == rpn_types::INT) {
+                    id_table[p1.name] = rpn_item::get_int_item(p2.int_val);
+                } else if (p2.type == rpn_types::DOUBLE) {
+                    id_table[p1.name] = rpn_item::get_double_item(p2.double_val);
+                }
+                eval.push(p1);
+            }
+        }
+
+        cur++;
+    }
+}

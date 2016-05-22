@@ -5,7 +5,7 @@
 #ifndef COMPILER_SYNTAX_ANALYSIS_H
 #define COMPILER_SYNTAX_ANALYSIS_H
 
-#include "lexem_types.cpp"
+#include "lexem_types.h"
 #include "IdTable.h"
 using namespace std;
 
