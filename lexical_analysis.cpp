@@ -12,32 +12,30 @@ map<vertex, lexem_types> terminals;
 
 
 set<string> keywords = {
-        "for", "do", "while", "int",  "double", "main", "else", "to", "downto", "cinout"
+        "for", "do", "while", "int", "double", "main", "else", "to", "downto", "cinout"
 };
 
 set<string> bools_literal = {
         "true", "false"
 };
 
-vertex go_ahead(vertex cur, char c){
+vertex go_ahead(vertex cur, char c) {
 
-    if(cur==vertex::COMMENT_SHORT){
+    if (cur == vertex::COMMENT_SHORT) {
         return vertex::COMMENT_SHORT;
     }
-    if(cur==vertex::COMMENT_LONG)
-    {
-        if(c=='*')
+    if (cur == vertex::COMMENT_LONG) {
+        if (c == '*')
             return vertex::COMMENT_END_STAR;
         return vertex::COMMENT_LONG;
     }
-    if(cur==vertex::COMMENT_END_STAR)
-    {
-        if(c=='/')
+    if (cur == vertex::COMMENT_END_STAR) {
+        if (c == '/')
             return vertex::COMMENT_END_SLASH;
         return vertex::COMMENT_LONG;
     }
-    if(cur==vertex::STRING){
-        if(c=='"')
+    if (cur == vertex::STRING) {
+        if (c == '"')
             return vertex::END_STRING;
         return vertex::STRING;
     }
@@ -50,37 +48,42 @@ vector<lexem> lexicalAnalysis(string s) {
     string s2 = "";
     int curl = 1;
     for (auto c : s) {
-        if(c=='\n')
-            curl+=1;
-        if ( !possible(curv, c)
-             and curv!=vertex::ZERO) {
-            if(terminals[curv]!=lexem_types::SPAM) {
+        if (c == '\n')
+            curl += 1;
+        if (!possible(curv, c)
+            and curv != vertex::ZERO) {
+            if (terminals[curv] != lexem_types::SPAM) {
                 lexem l;
                 l.s = s2;
                 l.t = terminals[curv];
-                if (l.t == lexem_types::ID){
-                    if (keywords.find(l.s) != keywords.end()){
+                if (l.t == lexem_types::ID) {
+                    if (keywords.find(l.s) != keywords.end()) {
                         l.t = lexem_types::KEYWORD;
                     }
-                    else if (bools_literal.find(l.s) != bools_literal.end()){
+                    else if (bools_literal.find(l.s) != bools_literal.end()) {
                         l.t = lexem_types::BOOL_LITERAL;
                     }
                 };
+                if (l.t == lexem_types::STRING_LITERAL) {
+                    l.s = l.s.substr(1, l.s.size() - 2);
+                    l.s = regex_replace(l.s, regex("\\\\n"), "\n");
+                }
+
                 l.line = curl;
                 ans.push_back(l);
             }
             curv = vertex::ZERO;
-            s2="";
+            s2 = "";
         }
-        if (!possible(curv, c)){
+        if (!possible(curv, c)) {
             lexem l;
             l.s = c;
             l.t = lexem_types::OTHER;
             ans.push_back(l);
-            s2="";
-        }else {
+            s2 = "";
+        } else {
             curv = go_ahead(curv, c);
-            if(curv!=vertex::ZERO)
+            if (curv != vertex::ZERO)
                 s2 += c;
 
         }
@@ -91,11 +94,11 @@ vector<lexem> lexicalAnalysis(string s) {
 
 }
 
-bool possible(vertex cur, char c){
-    if(cur==vertex::COMMENT_SHORT)
-        return c!='\n';
-    if(cur==vertex::COMMENT_LONG or cur==vertex::STRING
-       or cur==vertex::COMMENT_END_STAR ){
+bool possible(vertex cur, char c) {
+    if (cur == vertex::COMMENT_SHORT)
+        return c != '\n';
+    if (cur == vertex::COMMENT_LONG or cur == vertex::STRING
+        or cur == vertex::COMMENT_END_STAR) {
         return true;
     }
     return edges[cur].find(c) != edges[cur].end();
@@ -108,7 +111,7 @@ void build() {
             {'-',  vertex::PLUSMINUS},
             {'+',  vertex::PLUSMINUS},
             {'=',  vertex::PLUSMINUS},
-            {':', vertex::PLUSMINUS},
+            {':',  vertex::PLUSMINUS},
             {'*',  vertex::PLUSMINUS},
             {'<',  vertex::PLUSMINUS},
             {'>',  vertex::PLUSMINUS},
@@ -142,16 +145,16 @@ void build() {
             {'+', vertex::OPERATOR_END},
             {'=', vertex::OPERATOR_END},
             {'*', vertex::OPERATOR_END},
-            {'<', vertex::OPERATOR_END },
-            {'>', vertex::OPERATOR_END },
+            {'<', vertex::OPERATOR_END},
+            {'>', vertex::OPERATOR_END},
             {'=', vertex::OPERATOR_END}
     };
     edges[vertex::FLOAT] = {
             {'f', vertex::FLOAT_END}
     };
     edges[vertex::SLASH] = {
-            {'/', vertex::COMMENT_SHORT },
-            {'*', vertex::COMMENT_LONG }
+            {'/', vertex::COMMENT_SHORT},
+            {'*', vertex::COMMENT_LONG}
     };
     for (char i = '0'; i <= '9'; ++i) {
         edges[vertex::ZERO][i] = vertex::INT;
@@ -168,7 +171,7 @@ void build() {
     for (char i = 'A'; i <= 'Z'; ++i) {
         names.insert(i);
     }
-    for(char c : names) {
+    for (char c : names) {
         edges[vertex::ZERO][c] = vertex::ID_END;
         edges[vertex::ID_END][c] = vertex::ID_END;
     }

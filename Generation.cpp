@@ -52,6 +52,11 @@ vector<rpn_item> Generation::get_poliz(int start, int end) {
             pol.type = rpn_types::INT;
             pol.int_val = atoi(lexems[i].s.c_str());
             poliz.push_back(pol);
+        } else if (lexems[i].t == lexem_types::STRING_LITERAL) {
+            rpn_item pol;
+            pol.type = rpn_types::STRING;
+            pol.string_val = lexems[i].s;
+            poliz.push_back(pol);
         } else if (lexems[i].t == lexem_types::BOOL_LITERAL) {
             rpn_item pol;
             pol.type = rpn_types::BOOL;
@@ -72,7 +77,7 @@ vector<rpn_item> Generation::get_poliz(int start, int end) {
                                curp == 15;
             while (operations.size() > 0 and operations.top().name != "(" and
                    (priority[operations.top().name] < curp or
-                    (right_assoc and priority[operations.top().name] == curp))) {
+                    (!right_assoc and priority[operations.top().name] == curp))) {
                 poliz.push_back(operations.top());
                 operations.pop();
             }
@@ -202,7 +207,8 @@ void Generation::run() {
             eval.push(rpn_queue[cur]);
         } else if (rpn_queue[cur].type == rpn_types::DOUBLE) {
             eval.push(rpn_queue[cur]);
-        } else if (rpn_queue[cur].type == rpn_types::BOOL) {
+        } else if (rpn_queue[cur].type == rpn_types::BOOL or
+                rpn_queue[cur].type == rpn_types::STRING ) {
             eval.push(rpn_queue[cur]);
         }
         else if (rpn_queue[cur].type == rpn_types::VAR) {
@@ -328,6 +334,8 @@ void Generation::run() {
                         cout << p2.int_val;
                     } else if (p2.type == rpn_types::BOOL) {
                         cout << p2.bool_val;
+                    }else if (p2.type == rpn_types::STRING) {
+                        cout << p2.string_val;
                     }
                     eval.push(p1);
                 }

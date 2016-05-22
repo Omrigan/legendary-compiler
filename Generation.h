@@ -14,6 +14,7 @@ enum class rpn_types{
     BOOL,
     INT,
     DOUBLE,
+    STRING,
     VAR,
     NUM,
     COND,
@@ -29,6 +30,7 @@ public:
     int int_val;
     double double_val;
     bool bool_val;
+    string string_val;
     static rpn_item get_bool_item(bool value){
         rpn_item item;
         item.type = rpn_types ::BOOL;
@@ -61,6 +63,7 @@ public:
             {rpn_types::BOOL, "BOOL"},
             {rpn_types::INT, "INT"},
             {rpn_types::DOUBLE, "DOUBLE"},
+            {rpn_types::STRING, "STRING"},
             {rpn_types::VAR, "VAR"},
             {rpn_types::NUM, "NUM"},
             {rpn_types::COND, "COND"},
