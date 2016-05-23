@@ -16,7 +16,7 @@ void Generation::build() {
     priority["/"] = 5;
     priority["%"] = 5;
     priority["+"] = 6;
-    priority["*"] = 6;
+    priority["-"] = 6;
     priority["<<"] = 7;
     priority[">>"] = 7;
     priority["<"] = 8;
@@ -156,7 +156,7 @@ vector<rpn_item> Generation::get_poliz(int start, int end) {
                     }
                     cyc.c1 = i;
                     cyc.c2 = i1;
-                } else {
+                } else { //pfor
 
 
                     vector<rpn_item> pol = get_poliz(i + 2, i1);
@@ -177,12 +177,6 @@ vector<rpn_item> Generation::get_poliz(int start, int end) {
 
 
                     rpn_item p1;
-                    p1.type = rpn_types::OPERATION;
-                    if (is_up)
-                        p1.name = "--";
-                    else
-                        p1.name = "++";
-                    poliz.push_back(p1);
                     i++;
                     i1 = i + 1;
                     while (lexems[i1].s != ")") {
@@ -207,13 +201,23 @@ vector<rpn_item> Generation::get_poliz(int start, int end) {
                     p1.type = rpn_types::COND;
                     poliz.push_back(p1);
 
+                    poliz.push_back(p_var);
+                    p1.type = rpn_types::OPERATION;
+                    if (is_up)
+                        p1.name = "--";
+                    else
+                        p1.name = "++";
+
+                    poliz.push_back(p1);
                     cyc.z = poliz.size();
 
 
                     //comparation
-
-
                     poliz.push_back(p_var);
+
+
+
+
                     p1.type = rpn_types ::OPERATION;
                     if (is_up)
                         p1.name = "++";
@@ -466,6 +470,90 @@ void Generation::run() {
                     }
                 }
             }
+            if (rpn_queue[cur].name == "%") {
+                rpn_item p2 = get_value(eval.top());
+                eval.pop();
+                rpn_item p1 = get_value(eval.top());
+                eval.pop();
+
+                if (p1.type == rpn_types::INT) {
+                    if (p2.type == rpn_types::INT) {
+                        eval.push(rpn_item::get_int_item(p1.int_val%p2.int_val));
+                    }
+                }
+            }
+            if (rpn_queue[cur].name == "|") {
+                rpn_item p2 = get_value(eval.top());
+                eval.pop();
+                rpn_item p1 = get_value(eval.top());
+                eval.pop();
+
+                if (p1.type == rpn_types::INT) {
+                    if (p2.type == rpn_types::INT) {
+                        eval.push(rpn_item::get_int_item(p1.int_val|p2.int_val));
+                    }
+                }
+                if (p1.type == rpn_types::BOOL) {
+                    if (p2.type == rpn_types::BOOL) {
+                        eval.push(rpn_item::get_bool_item(p1.bool_val|p2.bool_val));
+                    }
+                }
+            }
+            if (rpn_queue[cur].name == "&") {
+                rpn_item p2 = get_value(eval.top());
+                eval.pop();
+                rpn_item p1 = get_value(eval.top());
+                eval.pop();
+
+                if (p1.type == rpn_types::INT) {
+                    if (p2.type == rpn_types::INT) {
+                        eval.push(rpn_item::get_int_item(p1.int_val&p2.int_val));
+                    }
+                }
+                if (p1.type == rpn_types::BOOL) {
+                    if (p2.type == rpn_types::BOOL) {
+                        eval.push(rpn_item::get_bool_item(p1.bool_val&p2.bool_val));
+                    }
+                }
+            }
+            if (rpn_queue[cur].name == "^") {
+                rpn_item p2 = get_value(eval.top());
+                eval.pop();
+                rpn_item p1 = get_value(eval.top());
+                eval.pop();
+
+                if (p1.type == rpn_types::INT) {
+                    if (p2.type == rpn_types::INT) {
+                        eval.push(rpn_item::get_int_item(p1.int_val^p2.int_val));
+                    }
+                }
+                if (p1.type == rpn_types::BOOL) {
+                    if (p2.type == rpn_types::BOOL) {
+                        eval.push(rpn_item::get_bool_item(p1.bool_val^p2.bool_val));
+                    }
+                }
+            }
+            if (rpn_queue[cur].name == "**") {
+                rpn_item p2 = get_value(eval.top());
+                eval.pop();
+                rpn_item p1 = get_value(eval.top());
+                eval.pop();
+
+                if (p1.type == rpn_types::INT) {
+                    if (p2.type == rpn_types::INT) {
+                        eval.push(rpn_item::get_int_item((int) pow(p1.int_val,p2.int_val)));
+                    } else if (p2.type == rpn_types::DOUBLE) {
+                        eval.push(rpn_item::get_double_item(pow(p1.int_val, p2.double_val)));
+                    }
+                } else if (p1.type == rpn_types::DOUBLE) {
+                    if (p2.type == rpn_types::INT) {
+                        eval.push(rpn_item::get_double_item(pow(p1.double_val,p2.int_val)));
+                    } else if (p2.type == rpn_types::DOUBLE) {
+                        eval.push(rpn_item::get_double_item(pow(p1.double_val, p2.double_val)));
+                    }
+                }
+            }
+
             if (rpn_queue[cur].name == "<<") {
                 rpn_item p2 = get_value(eval.top());
                 eval.pop();
