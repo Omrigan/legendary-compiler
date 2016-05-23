@@ -107,6 +107,9 @@ void SyntaxAnalysis::atom1() {
 
 void SyntaxAnalysis::term() {
     do {
+        if (c.s == "*" || c.s == "/" || c.s == "&&" || c.s == "div" || c.s == "%"){
+            read();
+        }
         atom1();
     } while (c.s == "*" || c.s == "/" || c.s == "&&" || c.s == "div" || c.s == "%");
 }
@@ -327,7 +330,12 @@ void SyntaxAnalysis::operators() {
     if (c.s == "{") {
         read();
         sostoperators();
-        read();
+        if (c.s != "}"){
+            error(Error_codes::MISC);
+        }
+        else {
+            read();
+        }
     }
     else if (c.s == "do") {
         read();
@@ -371,6 +379,7 @@ void SyntaxAnalysis::program() {
         read();
         while (c.s != "main") {
             c.s = z;
+            lexem_number--;
             var();
             z = c.s;
             read();

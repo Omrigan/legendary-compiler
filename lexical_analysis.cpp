@@ -12,7 +12,7 @@ map<vertex, lexem_types> terminals;
 
 
 set<string> keywords = {
-        "for", "do", "while", "int", "boll", "double", "main", "else", "to", "downto", "cinout"
+        "for", "do", "while", "int", "bool", "double", "main", "else", "to", "downto", "cinout"
 };
 
 set<string> bools_literal = {
