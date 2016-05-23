@@ -103,55 +103,144 @@ vector<rpn_item> Generation::get_poliz(int start, int end) {
             operations.push(pol);
         } else if (lexems[i].t == lexem_types::KEYWORD) {
             if (lexems[i].s == "for") {
-                int i1 = i + 1;
-                while (lexems[i1].s != ";") {
-                    i1++;
-                }
-                vector<rpn_item> pol = get_poliz(i + 2, i1);
-                for (rpn_item p : pol) {
-                    poliz.push_back(p);
-                }
-                i1++;
-                i = i1;
-                while (lexems[i1].s != ";") {
-                    i1++;
-                }
-
-                pol = get_poliz(i, i1);
-                for (rpn_item p : pol) {
-                    poliz.push_back(p);
-                }
-
-                rpn_item p1;
-                p1.type = rpn_types::POS;
-                poliz.push_back(p1);
                 my_cycle cyc;
-                cyc.x_go = poliz.size() - 1;
-                p1.type = rpn_types::COND;
-                poliz.push_back(p1);
 
-                cyc.z = poliz.size();
-                for (rpn_item p : pol) {
-                    poliz.push_back(p);
-                }
-                p1;
-                p1.type = rpn_types::POS;
-                poliz.push_back(p1);
-                cyc.y_go = poliz.size() - 1;
-                p1.type = rpn_types::COND;
-                poliz.push_back(p1);
-
-                i = i1;
-                i++;
-                i1 = i + 1;
-                while (lexems[i1].s != ")") {
+                int i1 = i + 2;
+                while (lexems[i1].s != ";" and
+                       lexems[i1].s != "to" and
+                       lexems[i1].s != "downto") {
                     i1++;
                 }
-                cyc.c1 = i;
-                cyc.c2 = i1;
+                if (lexems[i1].s == ";") {                //cfor
+
+                    vector<rpn_item> pol = get_poliz(i + 2, i1);
+                    for (rpn_item p : pol) {
+                        poliz.push_back(p);
+                    }
+                    i1++;
+                    i = i1;
+                    while (lexems[i1].s != ";") {
+                        i1++;
+                    }
+                    //comparartion
+                    pol = get_poliz(i, i1);
+                    for (rpn_item p : pol) {
+                        poliz.push_back(p);
+                    }
+                    //end comparartion
+
+                    rpn_item p1;
+                    p1.type = rpn_types::POS;
+                    poliz.push_back(p1);
+                    cyc.x_go = poliz.size() - 1;
+                    p1.type = rpn_types::COND;
+                    poliz.push_back(p1);
+
+                    cyc.z = poliz.size();
+                    //comparartion
+                    for (rpn_item p : pol) {
+                        poliz.push_back(p);
+                    }
+                    //end comparation
+                    p1.type = rpn_types::POS;
+                    poliz.push_back(p1);
+                    cyc.y_go = poliz.size() - 1;
+                    p1.type = rpn_types::COND;
+                    poliz.push_back(p1);
+
+                    i = i1;
+                    i++;
+                    i1 = i + 1;
+                    while (lexems[i1].s != ")") {
+                        i1++;
+                    }
+                    cyc.c1 = i;
+                    cyc.c2 = i1;
+                } else {
+
+
+                    vector<rpn_item> pol = get_poliz(i + 2, i1);
+                    for (rpn_item p : pol) {
+                        poliz.push_back(p);
+                    }
+                    rpn_item p_var;
+                    p_var.type = rpn_types::VAR;
+                    p_var.name = lexems[i+2].s;
+                    poliz.push_back(p_var);
+                    i = i1;
+
+                    cyc.c1 = 0;
+                    cyc.c2 = 0;
+                    bool is_up = lexems[i1].s == "to";
+
+
+
+
+                    rpn_item p1;
+                    p1.type = rpn_types::OPERATION;
+                    if (is_up)
+                        p1.name = "--";
+                    else
+                        p1.name = "++";
+                    poliz.push_back(p1);
+                    i++;
+                    i1 = i + 1;
+                    while (lexems[i1].s != ")") {
+                        i1++;
+                    }
+                    pol = get_poliz(i, i1);
+                    //comparation
+                    poliz.push_back(p_var);
+
+                    p1.type = rpn_types::OPERATION;
+
+                    for (rpn_item p : pol) {
+                        poliz.push_back(p);
+                    }
+                    p1.type = rpn_types::OPERATION;
+                    p1.name = "!=";
+                    poliz.push_back(p1);
+                    //end comparartion
+                    p1.type = rpn_types::POS;
+                    poliz.push_back(p1);
+                    cyc.x_go = poliz.size() - 1;
+                    p1.type = rpn_types::COND;
+                    poliz.push_back(p1);
+
+                    cyc.z = poliz.size();
+
+
+                    //comparation
+
+
+                    poliz.push_back(p_var);
+                    p1.type = rpn_types ::OPERATION;
+                    if (is_up)
+                        p1.name = "++";
+                    else
+                        p1.name = "--";
+                    poliz.push_back(p1);
+
+                    for (rpn_item p : pol) {
+                        poliz.push_back(p);
+                    }
+                    p1.type = rpn_types::OPERATION;
+                    p1.name = "!=";
+                    poliz.push_back(p1);
+                    //end comparartion
+
+                    p1.type = rpn_types::POS;
+                    poliz.push_back(p1);
+                    cyc.y_go = poliz.size() - 1;
+                    p1.type = rpn_types::COND;
+                    poliz.push_back(p1);
+
+
+                }
                 go_back.push(cyc);
                 i = i1;
                 i++;
+
             } else if (lexems[i].s == "cinout") {
                 rpn_item pol;
                 pol.type = rpn_types::CINOUT;
@@ -444,6 +533,28 @@ void Generation::run() {
                         res = p1.int_val < p2.double_val;
                     } else if (p2.type == rpn_types::INT) {
                         res = p1.int_val < p2.int_val;
+                    }
+                }
+                eval.push(rpn_item::get_bool_item(res));
+            }
+            if (rpn_queue[cur].name == "!=") {
+                rpn_item p2 = get_value(eval.top());
+                eval.pop();
+                rpn_item p1 = get_value(eval.top());
+                eval.pop();
+
+                bool res;
+                if (p1.type == rpn_types::DOUBLE) {
+                    if (p2.type == rpn_types::DOUBLE) {
+                        res = p1.double_val != p2.double_val;
+                    } else if (p2.type == rpn_types::INT) {
+                        res = p1.double_val != p2.int_val;
+                    }
+                } else if (p2.type == rpn_types::INT) {
+                    if (p2.type == rpn_types::DOUBLE) {
+                        res = p1.int_val != p2.double_val;
+                    } else if (p2.type == rpn_types::INT) {
+                        res = p1.int_val != p2.int_val;
                     }
                 }
                 eval.push(rpn_item::get_bool_item(res));

@@ -1,8 +1,8 @@
 int main() {
     int n = 5;
-    for(int i = 4; i<n;i++){
+    for(i = 4 to 10){
         cinout << i*i << "\n";
-    }else{
+    } else{
         cinout << "Nothing!";
     }
 }
